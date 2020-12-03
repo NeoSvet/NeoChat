@@ -47,13 +47,13 @@ public class ChatController {
         String msg = tfMessage.getText().trim();
         if (msg.isEmpty())
             return;
-        if (msg.indexOf("/nick") == 0) {
+        if (msg.startsWith(Const.CMD_NICK)) {
             nick = msg.substring(msg.indexOf(" ") + 1);
             showMessage("Changed nick to " + nick);
             tfMessage.clear();
             return;
         }
-        if (msg.equals("/connect")) {
+        if (msg.equals(Const.CMD_CONNECT)) {
             sendMessage(msg);
             tfMessage.clear();
             return;
@@ -104,7 +104,7 @@ public class ChatController {
     }
 
     private void sendMessage(String msg) {
-        if(msg.equals("/connect")) {
+        if(msg.equals(Const.CMD_CONNECT)) {
             connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
             return;
         }

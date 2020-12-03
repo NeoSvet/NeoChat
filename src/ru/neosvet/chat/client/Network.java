@@ -1,5 +1,7 @@
 package ru.neosvet.chat.client;
 
+import ru.neosvet.chat.Const;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -40,7 +42,7 @@ public class Network {
             try {
                 while (true) {
                     String message = in.readUTF();
-                    if (message.equals("/stop")) {
+                    if (message.equals(Const.CMD_STOP)) {
                         connected = false;
                         viewer.showMessage("Connection interrupted");
                         return;

@@ -24,7 +24,7 @@ public class Server {
             Scanner scan = new Scanner(System.in);
             while (true) {
                 String s = scan.next();
-                if (s.equals("/stop")) {
+                if (s.equals(Const.CMD_STOP)) {
                     out.writeUTF(s);
                     out.flush();
                     connected = false;
@@ -56,9 +56,9 @@ public class Server {
                 while (connected) {
                     String message = in.readUTF();
                     System.out.println("Received message: " + message);
-                    if (message.indexOf("/exit") == message.indexOf(">") + 1) {
+                    if (message.indexOf(Const.CMD_EXIT) == message.indexOf(">") + 1) {
                         connected = false;
-                        out.writeUTF("/stop");
+                        out.writeUTF(Const.CMD_EXIT);
                         out.flush();
                     }
                 }
