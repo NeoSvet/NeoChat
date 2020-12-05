@@ -11,7 +11,7 @@ public class AuthSample implements AuthService {
         clients.add(new User("user1", "1111", "Борис_Николаевич"));
         clients.add(new User("user2", "2222", "Мартин_Некотов"));
         clients.add(new User("user3", "3333", "Гендальф_Серый"));
-        System.out.println("Сервис аутентификации запущен");
+        System.out.println("AuthService started");
     }
 
     @Override
@@ -26,7 +26,7 @@ public class AuthSample implements AuthService {
 
     @Override
     public void close() {
-        System.out.println("Сервис аутентификации завершен");
+        System.out.println("AuthService stopped");
 
     }
 }
