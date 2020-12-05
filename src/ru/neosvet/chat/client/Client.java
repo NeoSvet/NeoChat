@@ -110,17 +110,23 @@ public class Client extends Application {
 
     public void joinUser(String nick) {
         showMessage(String.format("%s joined the chat", nick));
-        chat.addUser(nick);
+        Platform.runLater(() -> {
+            chat.addUser(nick);
+        });
     }
 
     public void leftUser(String nick) {
         showMessage(String.format("%s left the chat", nick));
-        chat.removeUser(nick);
+        Platform.runLater(() -> {
+            chat.removeUser(nick);
+        });
     }
 
     public void loadUserList(String[] m) {
-        for (int i = 1; i < m.length; i++) {
-            chat.addUser(m[i]);
-        }
+        Platform.runLater(() -> {
+            for (int i = 1; i < m.length; i++) {
+                chat.addUser(m[i]);
+            }
+        });
     }
 }
