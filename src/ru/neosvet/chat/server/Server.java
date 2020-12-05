@@ -7,15 +7,15 @@ import ru.neosvet.chat.server.auth.AuthService;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Server {
     public final String nick = "Server";
     private ServerSocket serverSocket;
     private AuthService authService;
-    private List<ClientHandler> clients = new ArrayList<>();
+    private Map<String, ClientHandler> clients = new HashMap<>();
 
     public static void main(String[] args) {
         try {
@@ -77,7 +77,7 @@ public class Server {
     public void broadcastMessage(String msg, String sender, boolean isInfoMsg) throws IOException {
         if (!sender.equals(nick))
             System.out.printf("Received message from %s: %s%n", sender, msg);
-        for (ClientHandler client : clients) {
+        for (ClientHandler client : clients.values()) {
             if (client.getNick().equals(sender)) {
                 continue;
             }
@@ -92,19 +92,16 @@ public class Server {
     public boolean isNickBusy(String nick) {
         if (nick.equals(this.nick))
             return true;
-        for (ClientHandler client : clients) {
-            if (client.getNick().equals(nick)) {
-                return true;
-            }
-        }
+        if (clients.containsKey(nick))
+            return true;
         return false;
     }
 
     public void subscribe(ClientHandler clientHandler) {
-        clients.add(clientHandler);
+        clients.put(clientHandler.getNick(), clientHandler);
     }
 
     public void unSubscribe(ClientHandler clientHandler) {
-        clients.remove(clientHandler);
+        clients.remove(clientHandler.getNick());
     }
 }
