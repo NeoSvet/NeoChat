@@ -52,7 +52,7 @@ public class ClientHandler {
                         return;
                     }
                     sendCommand(Const.CMD_AUTH, nick);
-                    srv.broadcastMessage(String.format("%s joined the chat", nick), nick, true);
+                    srv.broadcastMessage(nick, String.format("%s joined the chat", nick));
                     srv.subscribe(this);
                     return;
                 } else {
@@ -80,13 +80,13 @@ public class ClientHandler {
                 System.out.println("private message | " + nick + ": " + message);
                 //TODO
             } else {
-                srv.broadcastMessage(message, nick, false);
+                srv.broadcastMessage(nick, message);
             }
         }
     }
 
     private void leaveChat() throws IOException {
-        srv.broadcastMessage(String.format("%s left the chat", nick), nick, true);
+        srv.broadcastMessage(nick, String.format("%s left the chat", nick));
         srv.unSubscribe(this);
         clientSocket.close();
     }
@@ -95,20 +95,13 @@ public class ClientHandler {
         return nick;
     }
 
-    public void sendMessage(String sender, String msg) throws IOException {
-        if (sender == null) {
-            sendCommand(Const.MSG_SYSTEM, msg);
-        } else {
-            sendCommand(Const.MSG_CLIENT, sender, msg);
-        }
-    }
-
     public void sendCommand(String cmd, String... args) throws IOException {
         StringBuilder builder = new StringBuilder(cmd);
         for (String s : args) {
             builder.append(Const.SEPARATOR);
             builder.append(s);
         }
+        System.out.println("send: " + builder.toString());
         out.writeUTF(builder.toString());
         out.flush();
     }

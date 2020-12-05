@@ -47,7 +47,7 @@ public class Network {
                     switch (m[0]) {
                         case Const.CMD_STOP:
                             connected = false;
-                            client.showMessage("Connection interrupted");
+                            client.showMessage("Server stopped");
                             return;
                         case Const.CMD_AUTH:
                             authentication(m);
@@ -60,9 +60,6 @@ public class Network {
                             break;
                         case Const.MSG_PRIVATE:
                             client.showMessage(String.format("[PRIVATE]<%s>%s", m[1], m[2]));
-                            break;
-                        case Const.MSG_SYSTEM:
-                            client.showMessage("[SYSTEM]" + m[1]);
                             break;
                         default:
                             client.showMessage(Arrays.toString(m));

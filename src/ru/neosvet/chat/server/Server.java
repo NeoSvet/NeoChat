@@ -7,12 +7,13 @@ import ru.neosvet.chat.server.auth.AuthService;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Server {
-    public final String nick = "Server";
+    private final String nick = "Server";
     private ServerSocket serverSocket;
     private AuthService authService;
     private Map<String, ClientHandler> clients = new HashMap<>();
@@ -35,12 +36,12 @@ public class Server {
                 stop();
                 return;
             }
-            broadcastMessage(s, nick, false);
+            broadcastMessage(nick, s);
         }
     }
 
     private void stop() throws IOException {
-        broadcastMessage("Server stopped", nick, true);
+        broadcastCommand(nick, Const.CMD_STOP);
         authService.close();
         serverSocket.close();
         System.exit(0);
@@ -74,15 +75,26 @@ public class Server {
         clientHandler.handle();
     }
 
-    public void broadcastMessage(String msg, String sender, boolean isInfoMsg) throws IOException {
-        if (!sender.equals(nick))
-            System.out.printf("Received message from %s: %s%n", sender, msg);
+    public void broadcastMessage(String sender, String msg) throws IOException {
+        broadcastCommand(sender, Const.MSG_CLIENT, sender, msg);
+    }
+
+    public void broadcastCommand(String sender, String cmd, String... args) throws IOException {
+        if (!sender.equals(nick)) {
+            System.out.printf("Received from %s: %s%n", sender, Arrays.toString(args));
+            if (isNotClientCmd(cmd))
+                return;
+        }
         for (ClientHandler client : clients.values()) {
             if (client.getNick().equals(sender)) {
                 continue;
             }
-            client.sendMessage(isInfoMsg ? null : sender, msg);
+            client.sendCommand(cmd, args);
         }
+    }
+
+    private boolean isNotClientCmd(String cmd) {
+        return cmd.equals(Const.CMD_STOP);
     }
 
     public AuthService getAuthService() {

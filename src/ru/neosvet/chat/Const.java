@@ -11,6 +11,5 @@ public interface Const {
     String CMD_AUTH = "/auth";
     String CMD_ERROR = "/error";
     String MSG_PRIVATE = "/w";
-    String MSG_CLIENT = "/clientMsg";
-    String MSG_SYSTEM = "/systemMsg";
+    String MSG_CLIENT = "/msg";
 }
