@@ -8,7 +8,7 @@
             maxHeight="-Infinity" maxWidth="-Infinity"
             minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="400.0" prefWidth="600.0"
-            fx:controller="ru.neosvet.chat.client.ChatController">
+            fx:controller="ru.neosvet.chat.client.chat.ChatController">
     <center>
         <SplitPane dividerPositions="0.755" prefHeight="40.0" prefWidth="150.0"
                    BorderPane.alignment="CENTER">

@@ -6,16 +6,18 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class Network {
     private DataInputStream in;
     private DataOutputStream out;
     private Socket socket;
-    private ChatController viewer;
     private boolean connected = false;
+    private Client client;
+    private String nick = "noname";
 
-    public Network(ChatController viewer) {
-        this.viewer = viewer;
+    public Network(Client client) {
+        this.client = client;
     }
 
     public void connect(String host, int port) throws IOException {
@@ -25,11 +27,11 @@ public class Network {
         connected = true;
     }
 
-    public void close(String nick) {
+    public void close() {
         if (!connected)
             return;
         try {
-            out.writeUTF("<" + nick + ">/exit");
+            sendMessage(Const.CMD_EXIT);
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -37,21 +39,39 @@ public class Network {
 
     }
 
-    public void waitMessage() {
+    private void waitMessage() {
         Thread thread = new Thread(() -> {
             try {
                 while (true) {
-                    String message = in.readUTF();
-                    if (message.equals(Const.CMD_STOP)) {
-                        connected = false;
-                        viewer.showMessage("Connection interrupted");
-                        return;
+                    String[] m = parseMessage(in.readUTF());
+                    switch (m[0]) {
+                        case Const.CMD_STOP:
+                            connected = false;
+                            client.showMessage("Connection interrupted");
+                            return;
+                        case Const.CMD_AUTH:
+                            authentication(m);
+                            break;
+                        case Const.CMD_ERROR:
+                            client.showErrorMessage(m[1], m[2]);
+                            break;
+                        case Const.MSG_CLIENT:
+                            client.showMessage(String.format("<%s>%s", m[1], m[2]));
+                            break;
+                        case Const.MSG_PRIVATE:
+                            client.showMessage(String.format("[PRIVATE]<%s>%s", m[1], m[2]));
+                            break;
+                        case Const.MSG_SYSTEM:
+                            client.showMessage("[SYSTEM]" + m[1]);
+                            break;
+                        default:
+                            client.showMessage(Arrays.toString(m));
+                            break;
                     }
-                    viewer.showMessage(message);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                viewer.showErrorMessage(e.getMessage());
+                client.showErrorMessage("Network error", e.getMessage());
             }
 
         });
@@ -59,16 +79,43 @@ public class Network {
         thread.start();
     }
 
-    public void sendMessage(String msg) throws Exception {
+    private void authentication(String[] m) {
+        if (m[1].equals(Const.CMD_ERROR)) {
+            client.resultAuth(m[2]);
+            return;
+        }
+        nick = m[1];
+        client.resultAuth(null);
+    }
+
+    private String[] parseMessage(String s) {
+        return s.split(Const.SEPARATOR, 3);
+    }
+
+    public void sendMessage(String msg) throws IOException {
         if (!connected) {
-            try {
-                viewer.showMessage("Message not sent: no connection");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            client.showMessage("No connection");
             return;
         }
         out.writeUTF(msg);
+        out.flush();
+    }
+
+    public void sendCommand(String cmd, String[] args) throws IOException {
+        if (cmd.equals(Const.CMD_AUTH))
+            waitMessage();
+
+        StringBuilder builder = new StringBuilder(cmd);
+        for (String s : args) {
+            builder.append(Const.SEPARATOR);
+            builder.append(s);
+        }
+        sendMessage(builder.toString());
+    }
+
+
+    public String getNick() {
+        return nick;
     }
 }
 

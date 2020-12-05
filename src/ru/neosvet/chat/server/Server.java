@@ -1,75 +1,110 @@
 package ru.neosvet.chat.server;
 
 import ru.neosvet.chat.Const;
+import ru.neosvet.chat.server.auth.AuthSample;
+import ru.neosvet.chat.server.auth.AuthService;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Server {
-    private static DataOutputStream out;
-    private boolean connected = false;
+    public final String nick = "Server";
+    private ServerSocket serverSocket;
+    private AuthService authService;
+    private List<ClientHandler> clients = new ArrayList<>();
 
     public static void main(String[] args) {
-        Server server = new Server();
-        server.start(Const.DEFAULT_PORT);
-        server.chat();
-    }
-
-    private void chat() {
         try {
-            Scanner scan = new Scanner(System.in);
-            while (true) {
-                String s = scan.next();
-                if (s.equals(Const.CMD_STOP)) {
-                    out.writeUTF(s);
-                    out.flush();
-                    connected = false;
-                    System.out.println("Server stopped");
-                    System.exit(0);
-                } else if (connected) {
-                    out.writeUTF("<Server>" + s);
-                    out.flush();
-                } else {
-                    System.out.println("Message not sent: no connection");
-                }
-            }
+            Server server = new Server();
+            server.start(Const.DEFAULT_PORT);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Error Server: " + e.getMessage());
         }
     }
 
-    public void start(int port) {
-        Thread thread = new Thread(() -> {
-            try (ServerSocket serverSocket = new ServerSocket(port)) {
-                System.out.println("Waiting for connection...");
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Connection established!");
-                connected = true;
+    private void chat() throws IOException {
+        Scanner scan = new Scanner(System.in);
+        while (true) {
+            String s = scan.next();
+            if (s.equals(Const.CMD_STOP)) {
+                stop();
+                return;
+            }
+            broadcastMessage(s, nick, false);
+        }
+    }
 
-                DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-                out = new DataOutputStream(clientSocket.getOutputStream());
+    private void stop() throws IOException {
+        broadcastMessage("Server stopped", nick, true);
+        authService.close();
+        serverSocket.close();
+        System.exit(0);
+    }
 
-                while (connected) {
-                    String message = in.readUTF();
-                    System.out.println("Received message: " + message);
-                    if (message.indexOf(Const.CMD_EXIT) == message.indexOf(">") + 1) {
-                        connected = false;
-                        out.writeUTF(Const.CMD_EXIT);
-                        out.flush();
-                    }
+    public void start(int port) throws IOException {
+        this.serverSocket = new ServerSocket(port);
+        this.authService = new AuthSample();
+        authService.start();
+        System.out.println("Server started");
+
+        new Thread(() -> {
+            try {
+                while (true) {
+                    waitNewConnection();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("Port already busy");
-                return;
+                System.out.println("Error Server: " + e.getMessage());
             }
+        }).start();
 
-            start(Const.DEFAULT_PORT);
-        });
-        thread.start();
+        chat();
+    }
+
+    private void waitNewConnection() throws IOException {
+        System.out.println("Waiting for connection...");
+        Socket clientSocket = serverSocket.accept();
+        System.out.println("User connected!");
+        ClientHandler clientHandler = new ClientHandler(this, clientSocket);
+        clientHandler.handle();
+    }
+
+    public void broadcastMessage(String msg, String sender, boolean isInfoMsg) throws IOException {
+        if (!sender.equals(nick))
+            System.out.printf("Received message from %s: %s%n", sender, msg);
+        for (ClientHandler client : clients) {
+            if (client.getNick().equals(sender)) {
+                continue;
+            }
+            client.sendMessage(isInfoMsg ? null : sender, msg);
+        }
+    }
+
+    public AuthService getAuthService() {
+        return authService;
+    }
+
+    public boolean isNickBusy(String nick) {
+        if (nick.equals(this.nick))
+            return true;
+        for (ClientHandler client : clients) {
+            if (client.getNick().equals(nick)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void subscribe(ClientHandler clientHandler) {
+        clients.add(clientHandler);
+    }
+
+    public void unSubscribe(ClientHandler clientHandler) {
+        clients.remove(clientHandler);
     }
 }

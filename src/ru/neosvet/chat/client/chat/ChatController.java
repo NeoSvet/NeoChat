@@ -1,4 +1,4 @@
-package ru.neosvet.chat.client;
+package ru.neosvet.chat.client.chat;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -8,6 +8,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import ru.neosvet.chat.Const;
+import ru.neosvet.chat.client.Client;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -22,13 +23,12 @@ public class ChatController {
     @FXML
     private ListView lvUsers;
 
-    private String nick = "noname";
-    private Network network;
+    private Client client;
+
 
     @FXML
     public void initialize() {
         initEventSelectUser();
-        connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
     }
 
     private void initEventSelectUser() {
@@ -42,25 +42,26 @@ public class ChatController {
 
     @FXML
     public void sendMessage(ActionEvent actionEvent) {
-        if (tfMessage.getText().isEmpty())
-            return;
         String msg = tfMessage.getText().trim();
         if (msg.isEmpty())
             return;
-        if (msg.startsWith(Const.CMD_NICK)) {
+        /*if (msg.startsWith(Const.CMD_NICK)) {
             nick = msg.substring(msg.indexOf(" ") + 1);
             showMessage("Changed nick to " + nick);
             tfMessage.clear();
             return;
-        }
+        }*/
         if (msg.equals(Const.CMD_CONNECT)) {
-            sendMessage(msg);
+            connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
             tfMessage.clear();
             return;
         }
-        msg = "<" + nick + ">" + msg;
         try {
-            showMessage(msg);
+            if(msg.equals(Const.CMD_EXIT)) {
+                showMessage("You left the chat");
+            } else {
+                showMessage("<" + client.getMyNick() + ">" + msg);
+            }
             sendMessage(msg);
             tfMessage.clear();
         } catch (Exception e) {
@@ -69,10 +70,7 @@ public class ChatController {
     }
 
     public void showMessage(String msg) {
-        if (taChat.getText().isEmpty())
-            taChat.setText(getTime() + msg + "\n");
-        else
-            taChat.setText(taChat.getText() + getTime() + msg + "\n");
+        taChat.setText(taChat.getText() + getTime() + msg + "\n");
     }
 
     private String getTime() {
@@ -83,20 +81,10 @@ public class ChatController {
         lvUsers.getItems().add(name);
     }
 
-    public String getNick() {
-        return nick;
-    }
-
-    public void close() {
-        network.close(nick);
-    }
-
     public void connect(String localhost, int port) {
-        network = new Network(this);
         try {
-            network.connect(localhost, port);
+            client.connect(localhost, port);
             showMessage("Connection to server successful");
-            network.waitMessage();
         } catch (IOException e) {
             e.printStackTrace();
             showMessage("Connection to server failed: " + e.getMessage());
@@ -104,19 +92,16 @@ public class ChatController {
     }
 
     private void sendMessage(String msg) {
-        if(msg.equals(Const.CMD_CONNECT)) {
-            connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
-            return;
-        }
         try {
-            network.sendMessage(msg);
+            client.sendMessage(msg);
         } catch (Exception e) {
             e.printStackTrace();
-            showErrorMessage(e.getMessage());
+            showMessage("[ERROR]" + e.getMessage());
         }
     }
 
-    public void showErrorMessage(String msg) {
-        showMessage("Error: " + msg);
+    public void setClient(Client client) {
+        this.client = client;
+        connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
     }
 }
