@@ -117,4 +117,10 @@ public class Client extends Application {
         showMessage(String.format("%s left the chat", nick));
         chat.removeUser(nick);
     }
+
+    public void loadUserList(String[] m) {
+        for (int i = 1; i < m.length; i++) {
+            chat.addUser(m[i]);
+        }
+    }
 }

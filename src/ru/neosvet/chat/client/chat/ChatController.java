@@ -21,7 +21,7 @@ public class ChatController {
     @FXML
     private TextArea taChat;
     @FXML
-    private ListView lvUsers;
+    private ListView<String> lvUsers;
 
     private Client client;
 
@@ -57,8 +57,11 @@ public class ChatController {
             return;
         }
         try {
-            if (!msg.equals(Const.CMD_EXIT))
+            if (msg.equals(Const.CMD_EXIT)) {
+                lvUsers.getItems().clear();
+            } else {
                 showMessage("<" + client.getMyNick() + ">" + msg);
+            }
             sendMessage(msg);
             tfMessage.clear();
         } catch (Exception e) {
@@ -81,6 +84,7 @@ public class ChatController {
 
     public void removeUser(String nick) {
         lvUsers.getItems().remove(nick);
+        lvUsers.refresh();
     }
 
     public void connect(String localhost, int port) {

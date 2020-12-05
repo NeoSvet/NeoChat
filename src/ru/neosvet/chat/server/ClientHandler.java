@@ -52,6 +52,7 @@ public class ClientHandler {
                         return;
                     }
                     sendCommand(Const.CMD_AUTH, nick);
+                    sendCommand(Const.CMD_LIST, srv.getUsersList());
                     srv.broadcastCommand(nick, Const.CMD_JOIN, nick);
                     srv.subscribe(this);
                     return;
@@ -66,7 +67,7 @@ public class ClientHandler {
     }
 
     private String[] parseCommand(String s) {
-        return s.split(Const.SEPARATOR, 3);
+        return s.split(Const.SEPARATOR);
     }
 
     private void readMessage() throws IOException {

@@ -63,6 +63,9 @@ public class Network {
                         case Const.CMD_JOIN:
                             client.joinUser(m[1]);
                             break;
+                        case Const.CMD_LIST:
+                            client.loadUserList(m);
+                            break;
                         case Const.CMD_LEFT:
                             client.leftUser(m[1]);
                             break;
@@ -97,7 +100,7 @@ public class Network {
     }
 
     private String[] parseMessage(String s) {
-        return s.split(Const.SEPARATOR, 3);
+        return s.split(Const.SEPARATOR);
     }
 
     public void sendMessage(String msg) throws IOException {

@@ -116,4 +116,14 @@ public class Server {
     public void unSubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler.getNick());
     }
+
+    public String[] getUsersList() {
+        String[] m = new String[clients.size() + 1];
+        m[0] = nick;
+        int i = 1;
+        for (String nick : clients.keySet()) {
+            m[i++] = nick;
+        }
+        return m;
+    }
 }

@@ -11,6 +11,7 @@ public interface Const {
     String CMD_AUTH = "/auth";
     String CMD_ERROR = "/error";
     String CMD_JOIN = "/join";
+    String CMD_LIST = "/list";
     String CMD_LEFT = "/left";
     String CMD_BYE = "/bye";
     String MSG_PRIVATE = "/w";
