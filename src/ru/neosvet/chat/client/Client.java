@@ -107,4 +107,14 @@ public class Client extends Application {
     public String getMyNick() {
         return network.getNick();
     }
+
+    public void joinUser(String nick) {
+        showMessage(String.format("%s joined the chat", nick));
+        chat.addUser(nick);
+    }
+
+    public void leftUser(String nick) {
+        showMessage(String.format("%s left the chat", nick));
+        chat.removeUser(nick);
+    }
 }

@@ -94,7 +94,7 @@ public class Server {
     }
 
     private boolean isNotClientCmd(String cmd) {
-        return cmd.equals(Const.CMD_STOP);
+        return cmd.equals(Const.CMD_STOP) || cmd.equals(Const.CMD_BYE);
     }
 
     public AuthService getAuthService() {

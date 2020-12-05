@@ -52,7 +52,7 @@ public class ClientHandler {
                         return;
                     }
                     sendCommand(Const.CMD_AUTH, nick);
-                    srv.broadcastMessage(nick, String.format("%s joined the chat", nick));
+                    srv.broadcastCommand(nick, Const.CMD_JOIN, nick);
                     srv.subscribe(this);
                     return;
                 } else {
@@ -86,7 +86,8 @@ public class ClientHandler {
     }
 
     private void leaveChat() throws IOException {
-        srv.broadcastMessage(nick, String.format("%s left the chat", nick));
+        sendCommand(Const.CMD_BYE, "");
+        srv.broadcastCommand(nick, Const.CMD_LEFT, nick);
         srv.unSubscribe(this);
         clientSocket.close();
     }
@@ -101,7 +102,6 @@ public class ClientHandler {
             builder.append(Const.SEPARATOR);
             builder.append(s);
         }
-        System.out.println("send: " + builder.toString());
         out.writeUTF(builder.toString());
         out.flush();
     }

@@ -57,11 +57,8 @@ public class ChatController {
             return;
         }
         try {
-            if(msg.equals(Const.CMD_EXIT)) {
-                showMessage("You left the chat");
-            } else {
+            if (!msg.equals(Const.CMD_EXIT))
                 showMessage("<" + client.getMyNick() + ">" + msg);
-            }
             sendMessage(msg);
             tfMessage.clear();
         } catch (Exception e) {
@@ -77,8 +74,13 @@ public class ChatController {
         return timeFormat.format(Calendar.getInstance().getTime());
     }
 
-    public void addUser(String name) {
-        lvUsers.getItems().add(name);
+
+    public void addUser(String nick) {
+        lvUsers.getItems().add(nick);
+    }
+
+    public void removeUser(String nick) {
+        lvUsers.getItems().remove(nick);
     }
 
     public void connect(String localhost, int port) {

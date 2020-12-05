@@ -10,6 +10,9 @@ public interface Const {
     String CMD_NICK = "/nick";
     String CMD_AUTH = "/auth";
     String CMD_ERROR = "/error";
+    String CMD_JOIN = "/join";
+    String CMD_LEFT = "/left";
+    String CMD_BYE = "/bye";
     String MSG_PRIVATE = "/w";
     String MSG_CLIENT = "/msg";
 }

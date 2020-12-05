@@ -36,7 +36,6 @@ public class Network {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private void waitMessage() {
@@ -47,13 +46,25 @@ public class Network {
                     switch (m[0]) {
                         case Const.CMD_STOP:
                             connected = false;
+                            socket.close();
                             client.showMessage("Server stopped");
+                            return;
+                        case Const.CMD_BYE:
+                            connected = false;
+                            socket.close();
+                            client.showMessage("You left the chat");
                             return;
                         case Const.CMD_AUTH:
                             authentication(m);
                             break;
                         case Const.CMD_ERROR:
                             client.showErrorMessage(m[1], m[2]);
+                            break;
+                        case Const.CMD_JOIN:
+                            client.joinUser(m[1]);
+                            break;
+                        case Const.CMD_LEFT:
+                            client.leftUser(m[1]);
                             break;
                         case Const.MSG_CLIENT:
                             client.showMessage(String.format("<%s>%s", m[1], m[2]));
