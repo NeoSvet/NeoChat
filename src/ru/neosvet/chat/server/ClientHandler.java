@@ -1,5 +1,6 @@
 package ru.neosvet.chat.server;
 
+import ru.neosvet.chat.base.Chat;
 import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.server.auth.AuthService;
@@ -41,7 +42,7 @@ public class ClientHandler {
         while (true) {
             String msg = in.readUTF();
             if (msg.startsWith(Cmd.AUTH)) {
-                String[] m = parseCommand(msg);
+                String[] m = Chat.parseMessage(msg);
                 String login = m[1];
                 String password = m[2];
 
@@ -67,21 +68,19 @@ public class ClientHandler {
         }
     }
 
-    private String[] parseCommand(String s) {
-        return s.split(Const.SEPARATOR);
-    }
-
     private void readMessage() throws IOException {
         while (true) {
-            String msg = in.readUTF();
-            if (msg.startsWith(Cmd.EXIT)) {
-                leaveChat();
-                return;
-            } else if (msg.startsWith(Cmd.MSG_PRIVATE)) {
-                String[] m = parseCommand(msg);
-                srv.sendPrivateMessage(nick, m[1], m[2]);
-            } else {
-                srv.broadcastMessage(nick, msg);
+            String[] m = Chat.parseMessage(in.readUTF());
+            switch (m[0]) {
+                case Cmd.EXIT:
+                    leaveChat();
+                    return;
+                case Cmd.MSG_PRIVATE:
+                    srv.sendPrivateMessage(nick, m[1], m[2]);
+                    break;
+                case Cmd.MSG_CLIENT:
+                    srv.broadcastMessage(nick, m[1]);
+                    break;
             }
         }
     }
@@ -98,12 +97,6 @@ public class ClientHandler {
     }
 
     public void sendCommand(String cmd, String... args) throws IOException {
-        StringBuilder builder = new StringBuilder(cmd);
-        for (String s : args) {
-            builder.append(Const.SEPARATOR);
-            builder.append(s);
-        }
-        out.writeUTF(builder.toString());
-        out.flush();
+        Chat.sendCommand(out, cmd, args);
     }
 }

@@ -1,5 +1,6 @@
 package ru.neosvet.chat.client;
 
+import ru.neosvet.chat.base.Chat;
 import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.base.Const;
 
@@ -32,7 +33,7 @@ public class Network {
         if (!connected)
             return;
         try {
-            sendMessage(Cmd.EXIT);
+            sendCommand(Cmd.EXIT);
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,7 +44,7 @@ public class Network {
         Thread thread = new Thread(() -> {
             try {
                 while (true) {
-                    String[] m = parseMessage(in.readUTF());
+                    String[] m = Chat.parseMessage(in.readUTF());
                     switch (m[0]) {
                         case Cmd.STOP:
                             connected = false;
@@ -100,31 +101,16 @@ public class Network {
         client.resultAuth(null);
     }
 
-    private String[] parseMessage(String s) {
-        return s.split(Const.SEPARATOR);
-    }
-
-    public void sendMessage(String msg) throws IOException {
+    public void sendCommand(String cmd, String... args) throws IOException {
         if (!connected) {
             client.showMessage("No connection");
             return;
         }
-        out.writeUTF(msg);
-        out.flush();
-    }
-
-    public void sendCommand(String cmd, String... args) throws IOException {
         if (cmd.equals(Cmd.AUTH))
             waitMessage();
 
-        StringBuilder builder = new StringBuilder(cmd);
-        for (String s : args) {
-            builder.append(Const.SEPARATOR);
-            builder.append(s);
-        }
-        sendMessage(builder.toString());
+        Chat.sendCommand(out, cmd, args);
     }
-
 
     public String getNick() {
         return nick;

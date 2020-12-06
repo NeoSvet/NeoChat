@@ -50,7 +50,7 @@ public class Client extends Application {
     }
 
     public void sendMessage(String msg) throws IOException {
-        network.sendMessage(msg);
+        network.sendCommand(Cmd.MSG_CLIENT, msg);
     }
 
     public void connect(String host, int port) throws IOException {
