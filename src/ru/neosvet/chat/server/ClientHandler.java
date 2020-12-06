@@ -61,7 +61,7 @@ public class ClientHandler {
                 }
 
             } else {
-                sendCommand(Const.CMD_ERROR, "Error authentication", "You are not authorized");
+                sendCommand(Const.CMD_ERROR, "Authentication", "You are not authorized");
             }
         }
     }

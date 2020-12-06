@@ -82,7 +82,7 @@ public class Network {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                client.showErrorMessage("Network error", e.getMessage());
+                client.showErrorMessage("Network", e.getMessage());
             }
 
         });

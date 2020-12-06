@@ -46,7 +46,7 @@ public class Client extends Application {
     }
 
     public void showErrorMessage(String title, String msg) {
-        showMessage(title + ": " + msg);
+        showMessage("[ERROR]" + title + ": " + msg);
     }
 
     public void sendMessage(String msg) throws IOException {
