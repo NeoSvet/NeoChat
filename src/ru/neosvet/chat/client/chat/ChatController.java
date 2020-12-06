@@ -84,13 +84,12 @@ public class ChatController {
     }
 
     public void showMessage(String msg) {
-        taChat.setText(taChat.getText() + getTime() + msg + "\n");
+        taChat.appendText(getTime() + msg + "\n");
     }
 
     private String getTime() {
         return timeFormat.format(Calendar.getInstance().getTime());
     }
-
 
     public void addUser(String nick) {
         lvUsers.getItems().add(nick);
