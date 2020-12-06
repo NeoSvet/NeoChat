@@ -8,6 +8,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,11 +19,14 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private String nick = null;
+    private int number;
     private boolean connected = false;
 
-    public ClientHandler(Server srv, Socket clientSocket) {
+    public ClientHandler(Server srv, Socket clientSocket, int number) {
         this.srv = srv;
         this.clientSocket = clientSocket;
+        this.number = number;
+        System.out.printf("User #%d connected!%n", number);
     }
 
     public void handle() {
@@ -46,7 +50,7 @@ public class ClientHandler {
     private TimerTask task = new TimerTask() {
         @Override
         public void run() {
-            if (nick != null)
+            if (isAuthUser())
                 return;
             try {
                 connected = false;
@@ -58,11 +62,16 @@ public class ClientHandler {
         }
     };
 
+    private boolean isAuthUser() {
+        return number == 0;
+    }
+
     private void authentication() throws IOException {
         Timer t = new Timer();
         t.schedule(task, AUTH_TIMEOUT);
         while (true) {
             String msg = in.readUTF();
+            System.out.printf("Message from user #%d: %s%n", number, msg);
             if (msg.startsWith(Cmd.EXIT)) {
                 connected = false;
                 sendCommand(Cmd.BYE, "");
@@ -80,6 +89,7 @@ public class ClientHandler {
                     if (srv.isNickBusy(nick)) {
                         sendCommand(Cmd.AUTH, Cmd.ERROR, "Nick is busy");
                     } else {
+                        System.out.printf("User #%d auth as %s%n", number, nick);
                         sendCommand(Cmd.AUTH, nick);
                         sendCommand(Cmd.LIST, srv.getUsersList());
                         srv.broadcastCommand(nick, Cmd.JOIN, nick);
@@ -99,6 +109,7 @@ public class ClientHandler {
     private void readMessage() throws IOException {
         while (true) {
             String[] m = Chat.parseMessage(in.readUTF());
+            System.out.printf("Message from %s: %s%n", nick, Arrays.toString(m));
             switch (m[0]) {
                 case Cmd.EXIT:
                     leaveChat();

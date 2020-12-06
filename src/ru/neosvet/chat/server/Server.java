@@ -8,7 +8,6 @@ import ru.neosvet.chat.server.auth.AuthService;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -17,6 +16,7 @@ public class Server {
     private final String nick = "Server";
     private ServerSocket serverSocket;
     private AuthService authService;
+    private int count_users = 0;
     private Map<String, ClientHandler> clients = new HashMap<>();
 
     public static void main(String[] args) {
@@ -36,7 +36,7 @@ public class Server {
             if (s.equals(Cmd.STOP)) {
                 stop();
                 return;
-            } else if(s.startsWith(Cmd.MSG_PRIVATE)) {
+            } else if (s.startsWith(Cmd.MSG_PRIVATE)) {
                 String[] m = s.split(" ", 3);
                 sendPrivateMessage(nick, m[1], m[2]);
                 continue;
@@ -75,8 +75,8 @@ public class Server {
     private void waitNewConnection() throws IOException {
         System.out.println("Waiting for connection...");
         Socket clientSocket = serverSocket.accept();
-        System.out.println("User connected!");
-        ClientHandler clientHandler = new ClientHandler(this, clientSocket);
+        count_users++;
+        ClientHandler clientHandler = new ClientHandler(this, clientSocket, count_users);
         clientHandler.handle();
     }
 
@@ -85,10 +85,8 @@ public class Server {
     }
 
     public void broadcastCommand(String sender, String cmd, String... args) throws IOException {
-        if (!sender.equals(nick)) {
-            System.out.printf("Message from %s: %s%n", sender, Arrays.toString(args));
-            if (isNotClientCmd(cmd))
-                return;
+        if (!sender.equals(nick) && isNotClientCmd(cmd)) {
+            return;
         }
         for (ClientHandler client : clients.values()) {
             if (client.getNick().equals(sender)) {
@@ -133,7 +131,7 @@ public class Server {
     }
 
     public void sendPrivateMessage(String sender, String recipient, String msg) throws IOException {
-        if(nick.equals(recipient)) {
+        if (nick.equals(recipient)) {
             System.out.printf("Private message from %s: %s%n", sender, msg);
             return;
         }
@@ -141,7 +139,7 @@ public class Server {
             clients.get(recipient).sendCommand(Cmd.MSG_PRIVATE, sender, msg);
             return;
         }
-        if(nick.equals(sender)) {
+        if (nick.equals(sender)) {
             System.out.printf("User with nick '%s' is missing%n", recipient);
             return;
         }
