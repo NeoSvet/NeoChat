@@ -12,6 +12,7 @@ import ru.neosvet.chat.client.auth.AuthController;
 import ru.neosvet.chat.client.chat.ChatController;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Client extends Application {
     private final String UI_CHAT = "chat/chat.fxml";
@@ -49,8 +50,17 @@ public class Client extends Application {
         showMessage("[ERROR]" + title + ": " + msg);
     }
 
-    public void sendMessage(String msg) throws IOException {
-        network.sendCommand(Cmd.MSG_CLIENT, msg);
+    public void sendMessage(String s) throws IOException {
+        if (s.startsWith("/")) { //is command
+            if (s.contains(" ")) {
+                String[] m = s.split(" ", 3);
+                network.sendCommand(m[0], Arrays.copyOfRange(m, 1, m.length));
+                return;
+            }
+            network.sendCommand(s);
+            return;
+        }
+        network.sendCommand(Cmd.MSG_CLIENT, s);
     }
 
     public void connect(String host, int port) throws IOException {
