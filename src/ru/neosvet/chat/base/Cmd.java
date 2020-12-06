@@ -10,6 +10,7 @@ public interface Cmd {
     String LIST = "/list";
     String LEFT = "/left";
     String BYE = "/bye";
+    String KICK = "/kick";
     String MSG_PRIVATE = "/w";
     String MSG_CLIENT = "/msg";
 }

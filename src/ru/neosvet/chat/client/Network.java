@@ -15,7 +15,7 @@ public class Network {
     private Socket socket;
     private boolean connected = false;
     private Client client;
-    private String nick = "noname";
+    private String nick = null;
 
     public Network(Client client) {
         this.client = client;
@@ -26,6 +26,7 @@ public class Network {
         in = new DataInputStream(socket.getInputStream());
         out = new DataOutputStream(socket.getOutputStream());
         connected = true;
+        waitMessage();
     }
 
     public void close() {
@@ -57,6 +58,12 @@ public class Network {
                             client.showMessage("You left the chat");
                             client.disconnected();
                             return;
+                        case Cmd.KICK:
+                            connected = false;
+                            socket.close();
+                            client.showMessage("You was kicked");
+                            client.disconnected();
+                            break;
                         case Cmd.AUTH:
                             authentication(m);
                             break;
@@ -84,6 +91,8 @@ public class Network {
                     }
                 }
             } catch (IOException e) {
+                if(!connected)
+                    return;
                 e.printStackTrace();
                 client.showErrorMessage("Network", e.getMessage());
                 client.disconnected();
@@ -108,8 +117,6 @@ public class Network {
             client.showMessage("No connection");
             return;
         }
-        if (cmd.equals(Cmd.AUTH))
-            waitMessage();
 
         Chat.sendCommand(out, cmd, args);
     }

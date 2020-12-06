@@ -2,20 +2,23 @@ package ru.neosvet.chat.server;
 
 import ru.neosvet.chat.base.Chat;
 import ru.neosvet.chat.base.Cmd;
-import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.server.auth.AuthService;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ClientHandler {
+    private final int AUTH_TIMEOUT = 120000;
     private Server srv;
     private Socket clientSocket;
     private DataInputStream in;
     private DataOutputStream out;
-    private String nick;
+    private String nick = null;
+    private boolean connected = false;
 
     public ClientHandler(Server srv, Socket clientSocket) {
         this.srv = srv;
@@ -27,10 +30,12 @@ public class ClientHandler {
             try {
                 in = new DataInputStream(clientSocket.getInputStream());
                 out = new DataOutputStream(clientSocket.getOutputStream());
-
+                connected = true;
                 authentication();
                 readMessage();
             } catch (IOException e) {
+                if (!connected)
+                    return;
                 e.printStackTrace();
                 System.out.println("Error ClientHandler: " + e.getMessage());
                 srv.unSubscribe(this);
@@ -38,9 +43,32 @@ public class ClientHandler {
         }).start();
     }
 
+    private TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            if (nick != null)
+                return;
+            try {
+                connected = false;
+                sendCommand(Cmd.KICK, "");
+                clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     private void authentication() throws IOException {
+        Timer t = new Timer();
+        t.schedule(task, AUTH_TIMEOUT);
         while (true) {
             String msg = in.readUTF();
+            if (msg.startsWith(Cmd.EXIT)) {
+                connected = false;
+                sendCommand(Cmd.BYE, "");
+                clientSocket.close();
+                return;
+            }
             if (msg.startsWith(Cmd.AUTH)) {
                 String[] m = Chat.parseMessage(msg);
                 String login = m[1];
@@ -86,6 +114,7 @@ public class ClientHandler {
     }
 
     private void leaveChat() throws IOException {
+        connected = false;
         sendCommand(Cmd.BYE, "");
         srv.broadcastCommand(nick, Cmd.LEFT, nick);
         srv.unSubscribe(this);
