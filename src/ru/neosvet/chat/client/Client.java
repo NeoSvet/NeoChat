@@ -7,7 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import ru.neosvet.chat.Const;
+import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.client.auth.AuthController;
 import ru.neosvet.chat.client.chat.ChatController;
 
@@ -133,6 +133,6 @@ public class Client extends Application {
     }
 
     public void sendPrivateMessage(String recipient, String msg) throws IOException {
-        network.sendCommand(Const.MSG_PRIVATE, recipient, msg);
+        network.sendCommand(Cmd.MSG_PRIVATE, recipient, msg);
     }
 }

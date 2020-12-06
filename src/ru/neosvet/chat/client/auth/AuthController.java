@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import ru.neosvet.chat.Const;
+import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.client.Client;
 
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class AuthController {
         }
 
         try {
-            client.sendCommand(Const.CMD_AUTH, login, password);
+            client.sendCommand(Cmd.AUTH, login, password);
         } catch (IOException e) {
             e.printStackTrace();
             showError(e.getMessage());

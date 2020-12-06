@@ -1,6 +1,7 @@
 package ru.neosvet.chat.server;
 
-import ru.neosvet.chat.Const;
+import ru.neosvet.chat.base.Cmd;
+import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.server.auth.AuthSample;
 import ru.neosvet.chat.server.auth.AuthService;
 
@@ -32,10 +33,10 @@ public class Server {
         Scanner scan = new Scanner(System.in);
         while (true) {
             String s = scan.nextLine();
-            if (s.equals(Const.CMD_STOP)) {
+            if (s.equals(Cmd.STOP)) {
                 stop();
                 return;
-            } else if(s.startsWith(Const.MSG_PRIVATE)) {
+            } else if(s.startsWith(Cmd.MSG_PRIVATE)) {
                 String[] m = s.split(" ", 3);
                 sendPrivateMessage(nick, m[1], m[2]);
                 continue;
@@ -45,7 +46,7 @@ public class Server {
     }
 
     private void stop() throws IOException {
-        broadcastCommand(nick, Const.CMD_STOP);
+        broadcastCommand(nick, Cmd.STOP);
         authService.close();
         serverSocket.close();
         System.exit(0);
@@ -80,7 +81,7 @@ public class Server {
     }
 
     public void broadcastMessage(String sender, String msg) throws IOException {
-        broadcastCommand(sender, Const.MSG_CLIENT, sender, msg);
+        broadcastCommand(sender, Cmd.MSG_CLIENT, sender, msg);
     }
 
     public void broadcastCommand(String sender, String cmd, String... args) throws IOException {
@@ -98,7 +99,7 @@ public class Server {
     }
 
     private boolean isNotClientCmd(String cmd) {
-        return cmd.equals(Const.CMD_STOP) || cmd.equals(Const.CMD_BYE);
+        return cmd.equals(Cmd.STOP) || cmd.equals(Cmd.BYE);
     }
 
     public AuthService getAuthService() {
@@ -137,7 +138,7 @@ public class Server {
             return;
         }
         if (clients.containsKey(recipient)) {
-            clients.get(recipient).sendCommand(Const.MSG_PRIVATE, sender, msg);
+            clients.get(recipient).sendCommand(Cmd.MSG_PRIVATE, sender, msg);
             return;
         }
         if(nick.equals(sender)) {
@@ -145,7 +146,7 @@ public class Server {
             return;
         }
         if (clients.containsKey(sender)) {
-            clients.get(sender).sendCommand(Const.CMD_ERROR, "Message not sent",
+            clients.get(sender).sendCommand(Cmd.ERROR, "Message not sent",
                     String.format("User with nick '%s' is missing", recipient));
         }
     }

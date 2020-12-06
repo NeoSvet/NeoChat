@@ -8,7 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import ru.neosvet.chat.Const;
+import ru.neosvet.chat.base.Cmd;
+import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.client.Client;
 
 import java.io.IOException;
@@ -52,13 +53,13 @@ public class ChatController {
         String msg = tfMessage.getText().trim();
         if (msg.isEmpty())
             return;
-        /*if (msg.startsWith(Const.CMD_NICK)) {
+        /*if (msg.startsWith(Const.NICK)) {
             nick = msg.substring(msg.indexOf(" ") + 1);
             showMessage("Changed nick to " + nick);
             tfMessage.clear();
             return;
         }*/
-        if (msg.equals(Const.CMD_CONNECT)) {
+        if (msg.equals(Cmd.CONNECT)) {
             connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
             tfMessage.clear();
             return;
@@ -70,7 +71,7 @@ public class ChatController {
                 tfMessage.clear();
                 return;
             }
-            if (msg.equals(Const.CMD_EXIT)) {
+            if (msg.equals(Cmd.EXIT)) {
                 lvUsers.getItems().clear();
             } else {
                 showMessage(String.format("<%s>%s", client.getMyNick(), msg));

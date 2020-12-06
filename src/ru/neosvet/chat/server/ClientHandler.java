@@ -1,6 +1,7 @@
 package ru.neosvet.chat.server;
 
-import ru.neosvet.chat.Const;
+import ru.neosvet.chat.base.Cmd;
+import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.server.auth.AuthService;
 
 import java.io.DataInputStream;
@@ -39,7 +40,7 @@ public class ClientHandler {
     private void authentication() throws IOException {
         while (true) {
             String msg = in.readUTF();
-            if (msg.startsWith(Const.CMD_AUTH)) {
+            if (msg.startsWith(Cmd.AUTH)) {
                 String[] m = parseCommand(msg);
                 String login = m[1];
                 String password = m[2];
@@ -48,20 +49,20 @@ public class ClientHandler {
                 nick = authService.getNickByLoginAndPassword(login, password);
                 if (nick != null) {
                     if (srv.isNickBusy(nick)) {
-                        sendCommand(Const.CMD_AUTH, Const.CMD_ERROR, "Nick is busy");
+                        sendCommand(Cmd.AUTH, Cmd.ERROR, "Nick is busy");
                     } else {
-                        sendCommand(Const.CMD_AUTH, nick);
-                        sendCommand(Const.CMD_LIST, srv.getUsersList());
-                        srv.broadcastCommand(nick, Const.CMD_JOIN, nick);
+                        sendCommand(Cmd.AUTH, nick);
+                        sendCommand(Cmd.LIST, srv.getUsersList());
+                        srv.broadcastCommand(nick, Cmd.JOIN, nick);
                         srv.subscribe(this);
                         return;
                     }
                 } else {
-                    sendCommand(Const.CMD_AUTH, Const.CMD_ERROR, "Login or password is incorrect");
+                    sendCommand(Cmd.AUTH, Cmd.ERROR, "Login or password is incorrect");
                 }
 
             } else {
-                sendCommand(Const.CMD_ERROR, "Authentication", "You are not authorized");
+                sendCommand(Cmd.ERROR, "Authentication", "You are not authorized");
             }
         }
     }
@@ -73,10 +74,10 @@ public class ClientHandler {
     private void readMessage() throws IOException {
         while (true) {
             String msg = in.readUTF();
-            if (msg.startsWith(Const.CMD_EXIT)) {
+            if (msg.startsWith(Cmd.EXIT)) {
                 leaveChat();
                 return;
-            } else if (msg.startsWith(Const.MSG_PRIVATE)) {
+            } else if (msg.startsWith(Cmd.MSG_PRIVATE)) {
                 String[] m = parseCommand(msg);
                 srv.sendPrivateMessage(nick, m[1], m[2]);
             } else {
@@ -86,8 +87,8 @@ public class ClientHandler {
     }
 
     private void leaveChat() throws IOException {
-        sendCommand(Const.CMD_BYE, "");
-        srv.broadcastCommand(nick, Const.CMD_LEFT, nick);
+        sendCommand(Cmd.BYE, "");
+        srv.broadcastCommand(nick, Cmd.LEFT, nick);
         srv.unSubscribe(this);
         clientSocket.close();
     }

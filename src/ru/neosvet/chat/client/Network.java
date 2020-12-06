@@ -1,6 +1,7 @@
 package ru.neosvet.chat.client;
 
-import ru.neosvet.chat.Const;
+import ru.neosvet.chat.base.Cmd;
+import ru.neosvet.chat.base.Const;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -31,7 +32,7 @@ public class Network {
         if (!connected)
             return;
         try {
-            sendMessage(Const.CMD_EXIT);
+            sendMessage(Cmd.EXIT);
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -44,35 +45,35 @@ public class Network {
                 while (true) {
                     String[] m = parseMessage(in.readUTF());
                     switch (m[0]) {
-                        case Const.CMD_STOP:
+                        case Cmd.STOP:
                             connected = false;
                             socket.close();
                             client.showMessage("Server stopped");
                             return;
-                        case Const.CMD_BYE:
+                        case Cmd.BYE:
                             connected = false;
                             socket.close();
                             client.showMessage("You left the chat");
                             return;
-                        case Const.CMD_AUTH:
+                        case Cmd.AUTH:
                             authentication(m);
                             break;
-                        case Const.CMD_ERROR:
+                        case Cmd.ERROR:
                             client.showErrorMessage(m[1], m[2]);
                             break;
-                        case Const.CMD_JOIN:
+                        case Cmd.JOIN:
                             client.joinUser(m[1]);
                             break;
-                        case Const.CMD_LIST:
+                        case Cmd.LIST:
                             client.loadUserList(m);
                             break;
-                        case Const.CMD_LEFT:
+                        case Cmd.LEFT:
                             client.leftUser(m[1]);
                             break;
-                        case Const.MSG_CLIENT:
+                        case Cmd.MSG_CLIENT:
                             client.showMessage(String.format("<%s>%s", m[1], m[2]));
                             break;
-                        case Const.MSG_PRIVATE:
+                        case Cmd.MSG_PRIVATE:
                             client.showMessage(String.format("[PRIVATE FROM]<%s>%s", m[1], m[2]));
                             break;
                         default:
@@ -91,7 +92,7 @@ public class Network {
     }
 
     private void authentication(String[] m) {
-        if (m[1].equals(Const.CMD_ERROR)) {
+        if (m[1].equals(Cmd.ERROR)) {
             client.resultAuth(m[2]);
             return;
         }
@@ -113,7 +114,7 @@ public class Network {
     }
 
     public void sendCommand(String cmd, String... args) throws IOException {
-        if (cmd.equals(Const.CMD_AUTH))
+        if (cmd.equals(Cmd.AUTH))
             waitMessage();
 
         StringBuilder builder = new StringBuilder(cmd);
