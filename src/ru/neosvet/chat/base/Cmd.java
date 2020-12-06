@@ -4,7 +4,6 @@ public interface Cmd {
     String EXIT = "/exit";
     String STOP = "/stop";
     String CONNECT = "/connect";
-    String NICK = "/nick";
     String AUTH = "/auth";
     String ERROR = "/error";
     String JOIN = "/join";

@@ -53,12 +53,6 @@ public class ChatController {
         String msg = tfMessage.getText().trim();
         if (msg.isEmpty())
             return;
-        /*if (msg.startsWith(Const.NICK)) {
-            nick = msg.substring(msg.indexOf(" ") + 1);
-            showMessage("Changed nick to " + nick);
-            tfMessage.clear();
-            return;
-        }*/
         if (msg.equals(Cmd.CONNECT)) {
             connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
             tfMessage.clear();
