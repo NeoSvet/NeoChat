@@ -2,7 +2,6 @@ package ru.neosvet.chat.client;
 
 import ru.neosvet.chat.base.Chat;
 import ru.neosvet.chat.base.Cmd;
-import ru.neosvet.chat.base.Const;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -50,11 +49,13 @@ public class Network {
                             connected = false;
                             socket.close();
                             client.showMessage("Server stopped");
+                            client.disconnected();
                             return;
                         case Cmd.BYE:
                             connected = false;
                             socket.close();
                             client.showMessage("You left the chat");
+                            client.disconnected();
                             return;
                         case Cmd.AUTH:
                             authentication(m);
@@ -85,6 +86,7 @@ public class Network {
             } catch (IOException e) {
                 e.printStackTrace();
                 client.showErrorMessage("Network", e.getMessage());
+                client.disconnected();
             }
 
         });

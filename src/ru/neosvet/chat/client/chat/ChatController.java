@@ -71,9 +71,7 @@ public class ChatController {
                 tfMessage.clear();
                 return;
             }
-            if (msg.equals(Cmd.EXIT)) {
-                lvUsers.getItems().clear();
-            } else {
+            if (!msg.equals(Cmd.EXIT)) {
                 showMessage(String.format("<%s>%s", client.getMyNick(), msg));
             }
             sendMessage(msg);
@@ -124,5 +122,9 @@ public class ChatController {
         selectedUser = null;
         lvUsers.getSelectionModel().clearSelection();
         lPrivate.setText(SEND_GLOBAL);
+    }
+
+    public void reset() {
+        lvUsers.getItems().clear();
     }
 }

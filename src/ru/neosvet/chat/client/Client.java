@@ -135,4 +135,8 @@ public class Client extends Application {
     public void sendPrivateMessage(String recipient, String msg) throws IOException {
         network.sendCommand(Cmd.MSG_PRIVATE, recipient, msg);
     }
+
+    public void disconnected() {
+        chat.reset();
+    }
 }
