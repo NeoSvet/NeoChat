@@ -117,7 +117,7 @@ public class ClientHandler {
                 case Cmd.MSG_PRIVATE:
                     srv.sendPrivateMessage(nick, m[1], m[2]);
                     break;
-                case Cmd.MSG_CLIENT:
+                case Cmd.MSG_GLOBAL:
                     srv.broadcastMessage(nick, m[1]);
                     break;
             }

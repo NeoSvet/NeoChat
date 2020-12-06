@@ -60,7 +60,7 @@ public class Client extends Application {
             network.sendCommand(s);
             return;
         }
-        network.sendCommand(Cmd.MSG_CLIENT, s);
+        network.sendCommand(Cmd.MSG_GLOBAL, s);
     }
 
     public void connect(String host, int port) throws IOException {

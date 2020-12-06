@@ -12,5 +12,5 @@ public interface Cmd {
     String BYE = "/bye";
     String KICK = "/kick";
     String MSG_PRIVATE = "/w";
-    String MSG_CLIENT = "/msg";
+    String MSG_GLOBAL = "/m";
 }

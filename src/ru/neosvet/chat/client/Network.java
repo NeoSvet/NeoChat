@@ -79,7 +79,7 @@ public class Network {
                         case Cmd.LEFT:
                             client.leftUser(m[1]);
                             break;
-                        case Cmd.MSG_CLIENT:
+                        case Cmd.MSG_GLOBAL:
                             client.showMessage(String.format("<%s>%s", m[1], m[2]));
                             break;
                         case Cmd.MSG_PRIVATE:

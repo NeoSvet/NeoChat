@@ -81,7 +81,7 @@ public class Server {
     }
 
     public void broadcastMessage(String sender, String msg) throws IOException {
-        broadcastCommand(sender, Cmd.MSG_CLIENT, sender, msg);
+        broadcastCommand(sender, Cmd.MSG_GLOBAL, sender, msg);
     }
 
     public void broadcastCommand(String sender, String cmd, String... args) throws IOException {
