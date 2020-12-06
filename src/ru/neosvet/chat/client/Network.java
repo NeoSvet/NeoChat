@@ -73,7 +73,7 @@ public class Network {
                             client.showMessage(String.format("<%s>%s", m[1], m[2]));
                             break;
                         case Const.MSG_PRIVATE:
-                            client.showMessage(String.format("[PRIVATE]<%s>%s", m[1], m[2]));
+                            client.showMessage(String.format("[PRIVATE FROM]<%s>%s", m[1], m[2]));
                             break;
                         default:
                             client.showMessage(Arrays.toString(m));
@@ -112,7 +112,7 @@ public class Network {
         out.flush();
     }
 
-    public void sendCommand(String cmd, String[] args) throws IOException {
+    public void sendCommand(String cmd, String... args) throws IOException {
         if (cmd.equals(Const.CMD_AUTH))
             waitMessage();
 

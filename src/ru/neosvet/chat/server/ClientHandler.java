@@ -40,28 +40,28 @@ public class ClientHandler {
         while (true) {
             String msg = in.readUTF();
             if (msg.startsWith(Const.CMD_AUTH)) {
-                String[] parts = parseCommand(msg);
-                String login = parts[1];
-                String password = parts[2];
+                String[] m = parseCommand(msg);
+                String login = m[1];
+                String password = m[2];
 
                 AuthService authService = srv.getAuthService();
                 nick = authService.getNickByLoginAndPassword(login, password);
                 if (nick != null) {
                     if (srv.isNickBusy(nick)) {
                         sendCommand(Const.CMD_AUTH, Const.CMD_ERROR, "Nick is busy");
+                    } else {
+                        sendCommand(Const.CMD_AUTH, nick);
+                        sendCommand(Const.CMD_LIST, srv.getUsersList());
+                        srv.broadcastCommand(nick, Const.CMD_JOIN, nick);
+                        srv.subscribe(this);
                         return;
                     }
-                    sendCommand(Const.CMD_AUTH, nick);
-                    sendCommand(Const.CMD_LIST, srv.getUsersList());
-                    srv.broadcastCommand(nick, Const.CMD_JOIN, nick);
-                    srv.subscribe(this);
-                    return;
                 } else {
                     sendCommand(Const.CMD_AUTH, Const.CMD_ERROR, "Login or password is incorrect");
                 }
 
             } else {
-                sendCommand(Const.CMD_ERROR, "You are not authorized");
+                sendCommand(Const.CMD_ERROR, "Error authentication", "You are not authorized");
             }
         }
     }
@@ -72,16 +72,15 @@ public class ClientHandler {
 
     private void readMessage() throws IOException {
         while (true) {
-            String message = in.readUTF();
-            if (message.startsWith(Const.CMD_EXIT)) {
+            String msg = in.readUTF();
+            if (msg.startsWith(Const.CMD_EXIT)) {
                 leaveChat();
                 return;
-            } else if (message.startsWith(Const.MSG_PRIVATE)) {
-                // String[] parts = parseCommand(message);
-                System.out.println("private message | " + nick + ": " + message);
-                //TODO
+            } else if (msg.startsWith(Const.MSG_PRIVATE)) {
+                String[] m = parseCommand(msg);
+                srv.sendPrivateMessage(nick, m[1], m[2]);
             } else {
-                srv.broadcastMessage(nick, message);
+                srv.broadcastMessage(nick, msg);
             }
         }
     }

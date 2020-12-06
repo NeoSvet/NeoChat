@@ -31,10 +31,14 @@ public class Server {
     private void chat() throws IOException {
         Scanner scan = new Scanner(System.in);
         while (true) {
-            String s = scan.next();
+            String s = scan.nextLine();
             if (s.equals(Const.CMD_STOP)) {
                 stop();
                 return;
+            } else if(s.startsWith(Const.MSG_PRIVATE)) {
+                String[] m = s.split(" ", 3);
+                sendPrivateMessage(nick, m[1], m[2]);
+                continue;
             }
             broadcastMessage(nick, s);
         }
@@ -81,7 +85,7 @@ public class Server {
 
     public void broadcastCommand(String sender, String cmd, String... args) throws IOException {
         if (!sender.equals(nick)) {
-            System.out.printf("Received from %s: %s%n", sender, Arrays.toString(args));
+            System.out.printf("Message from %s: %s%n", sender, Arrays.toString(args));
             if (isNotClientCmd(cmd))
                 return;
         }
@@ -125,5 +129,24 @@ public class Server {
             m[i++] = nick;
         }
         return m;
+    }
+
+    public void sendPrivateMessage(String sender, String recipient, String msg) throws IOException {
+        if(nick.equals(recipient)) {
+            System.out.printf("Private message from %s: %s%n", sender, msg);
+            return;
+        }
+        if (clients.containsKey(recipient)) {
+            clients.get(recipient).sendCommand(Const.MSG_PRIVATE, sender, msg);
+            return;
+        }
+        if(nick.equals(sender)) {
+            System.out.printf("User with nick '%s' is missing%n", recipient);
+            return;
+        }
+        if (clients.containsKey(sender)) {
+            clients.get(sender).sendCommand(Const.CMD_ERROR, "Message not sent",
+                    String.format("User with nick '%s' is missing", recipient));
+        }
     }
 }

@@ -4,6 +4,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -21,21 +22,27 @@ public class ChatController {
     @FXML
     private TextArea taChat;
     @FXML
+    private Label lPrivate;
+    @FXML
     private ListView<String> lvUsers;
 
+    private final String SEND_GLOBAL = "Send global message";
     private Client client;
+    private String selectedUser = null;
 
 
     @FXML
     public void initialize() {
         initEventSelectUser();
+        lPrivate.setText(SEND_GLOBAL);
     }
 
     private void initEventSelectUser() {
         lvUsers.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-
+                selectedUser = newValue;
+                lPrivate.setText("Send private message to " + selectedUser);
             }
         });
     }
@@ -57,15 +64,22 @@ public class ChatController {
             return;
         }
         try {
+            if (selectedUser != null) {
+                showMessage(String.format("[PRIVATE TO]<%s>%s", selectedUser, msg));
+                client.sendPrivateMessage(selectedUser, msg);
+                tfMessage.clear();
+                return;
+            }
             if (msg.equals(Const.CMD_EXIT)) {
                 lvUsers.getItems().clear();
             } else {
-                showMessage("<" + client.getMyNick() + ">" + msg);
+                showMessage(String.format("<%s>%s", client.getMyNick(), msg));
             }
             sendMessage(msg);
             tfMessage.clear();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
+            showMessage("[ERROR]" + e.getMessage());
         }
     }
 
@@ -97,17 +111,18 @@ public class ChatController {
         }
     }
 
-    private void sendMessage(String msg) {
-        try {
-            client.sendMessage(msg);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showMessage("[ERROR]" + e.getMessage());
-        }
+    private void sendMessage(String msg) throws IOException {
+        client.sendMessage(msg);
     }
 
     public void setClient(Client client) {
         this.client = client;
         connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
+    }
+
+    public void unSelectUser(ActionEvent actionEvent) {
+        selectedUser = null;
+        lvUsers.getSelectionModel().clearSelection();
+        lPrivate.setText(SEND_GLOBAL);
     }
 }
