@@ -29,8 +29,8 @@ public class RequestFactory {
         return new MessageRequest(RequestType.MSG_GLOBAL, msg);
     }
 
-    public static Request createPrivateMsg(String msg) {
-        return new MessageRequest(RequestType.MSG_PRIVATE, msg);
+    public static Request createPrivateMsg(String recipient, String msg) {
+        return new PrivateMessageRequest(recipient, msg);
     }
 
     public static Request createError(String msg) {
