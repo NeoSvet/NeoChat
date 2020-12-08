@@ -10,6 +10,7 @@ public enum RequestType {
     LEFT,
     BYE,
     KICK,
+    NICK,
     MSG_PRIVATE,
     MSG_GLOBAL
 }

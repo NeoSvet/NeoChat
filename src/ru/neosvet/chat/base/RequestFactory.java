@@ -2,7 +2,7 @@ package ru.neosvet.chat.base;
 
 import ru.neosvet.chat.base.requests.*;
 
-import java.util.List;
+import java.util.Arrays;
 
 public class RequestFactory {
     public static Request createAuth(String login, String password) {
@@ -25,16 +25,20 @@ public class RequestFactory {
         return new SampleRequest(RequestType.KICK);
     }
 
-    public static Request createGlobalMsg(String msg) {
-        return new MessageRequest(RequestType.MSG_GLOBAL, msg);
+    public static Request createGlobalMsg(String sender, String msg) {
+        return new MessageRequest(RequestType.MSG_GLOBAL, sender, msg);
     }
 
-    public static Request createPrivateMsg(String recipient, String msg) {
-        return new PrivateMessageRequest(recipient, msg);
+    public static Request createPrivateMsg(String sender, String recipient, String msg) {
+        return new PrivateMessageRequest(sender, recipient, msg);
     }
 
-    public static Request createError(String msg) {
-        return new MessageRequest(RequestType.ERROR, msg);
+    public static Request createError(String title, String msg) {
+        return new MessageRequest(RequestType.ERROR, title, msg);
+    }
+
+    public static Request createNick(String nick) {
+        return new UserRequest(RequestType.NICK, nick);
     }
 
     public static Request createJoin(String nick) {
@@ -45,7 +49,16 @@ public class RequestFactory {
         return new UserRequest(RequestType.LEFT, nick);
     }
 
-    public static Request createList(List<String> users) {
+    public static Request createList(String[] users) {
         return new ListRequest(users);
+    }
+
+    public static Request parse(String s) {
+        if (s.contains(" ")) {
+            /* TODO parse string to Request
+            String[] m = s.split(" ", 3);
+            return;*/
+        }
+        return null;
     }
 }

@@ -7,12 +7,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import ru.neosvet.chat.base.Cmd;
+import ru.neosvet.chat.base.Request;
+import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.client.auth.AuthController;
 import ru.neosvet.chat.client.chat.ChatController;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class Client extends Application {
     private final String UI_CHAT = "chat/chat.fxml";
@@ -52,15 +52,13 @@ public class Client extends Application {
 
     public void sendMessage(String s) throws IOException {
         if (s.startsWith("/")) { //is command
-            if (s.contains(" ")) {
-                String[] m = s.split(" ", 3);
-                network.sendCommand(m[0], Arrays.copyOfRange(m, 1, m.length));
+            Request request = RequestFactory.parse(s);
+            if (request != null) {
+                sendRequest(request);
                 return;
             }
-            network.sendCommand(s);
-            return;
         }
-        network.sendCommand(Cmd.MSG_GLOBAL, s);
+        sendRequest(RequestFactory.createGlobalMsg(network.getNick(), s));
     }
 
     public void connect(String host, int port) throws IOException {
@@ -68,8 +66,8 @@ public class Client extends Application {
         openAuthWindow();
     }
 
-    public void sendCommand(String cmd, String... args) throws IOException {
-        network.sendCommand(cmd, args);
+    public void sendRequest(Request request) throws IOException {
+        network.sendRequest(request);
     }
 
     private void openAuthWindow() {
@@ -96,18 +94,18 @@ public class Client extends Application {
         }
     }
 
-    public void resultAuth(String msg) {
-        if (msg != null) {
+    public void resultAuth(String err_msg) {
+        if (err_msg != null) {
             Platform.runLater(() -> {
-                auth.showError(msg);
+                auth.showError(err_msg);
             });
-        } else {
-            Platform.runLater(() -> {
-                authStage.close();
-                chatStage.setTitle("Chat: " + network.getNick());
-            });
-            showMessage("You connected as " + network.getNick());
+            return;
         }
+        Platform.runLater(() -> {
+            authStage.close();
+            chatStage.setTitle("Chat: " + network.getNick());
+        });
+        showMessage("You connected as " + network.getNick());
     }
 
     public void showMessage(String msg) {
@@ -134,16 +132,16 @@ public class Client extends Application {
         });
     }
 
-    public void loadUserList(String[] m) {
+    public void loadUserList(String[] users) {
         Platform.runLater(() -> {
-            for (int i = 1; i < m.length; i++) {
-                chat.addUser(m[i]);
+            for (int i = 0; i < users.length; i++) {
+                chat.addUser(users[i]);
             }
         });
     }
 
     public void sendPrivateMessage(String recipient, String msg) throws IOException {
-        network.sendCommand(Cmd.MSG_PRIVATE, recipient, msg);
+        sendRequest(RequestFactory.createPrivateMsg(network.getNick(), recipient, msg));
     }
 
     public void disconnected() {

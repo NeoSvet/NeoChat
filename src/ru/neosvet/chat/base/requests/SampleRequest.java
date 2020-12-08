@@ -14,4 +14,10 @@ public class SampleRequest implements Request {
     public RequestType getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return String.format("[%s]", getType().toString());
+    }
+
 }

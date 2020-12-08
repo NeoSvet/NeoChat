@@ -17,6 +17,11 @@ public class UserRequest implements Request {
         return type;
     }
 
+    @Override
+    public String toString() {
+        return String.format("[%s]%s", getType().toString(), nick);
+    }
+
     public String getNick() {
         return nick;
     }

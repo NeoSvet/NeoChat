@@ -16,6 +16,11 @@ public class AuthRequest implements Request {
         return RequestType.AUTH;
     }
 
+    @Override
+    public String toString() {
+        return String.format("[%s]%s@%s", getType().toString(), login, password);
+    }
+
     public String getLogin() {
         return login;
     }

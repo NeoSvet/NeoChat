@@ -1,7 +1,8 @@
 package ru.neosvet.chat.server;
 
-import ru.neosvet.chat.base.Cmd;
-import ru.neosvet.chat.base.Const;
+import ru.neosvet.chat.base.*;
+import ru.neosvet.chat.base.requests.MessageRequest;
+import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.server.auth.AuthSample;
 import ru.neosvet.chat.server.auth.AuthService;
 
@@ -38,15 +39,16 @@ public class Server {
                 return;
             } else if (s.startsWith(Cmd.MSG_PRIVATE)) {
                 String[] m = s.split(" ", 3);
-                sendPrivateMessage(nick, m[1], m[2]);
+                sendPrivateMessage(nick, (PrivateMessageRequest)
+                        RequestFactory.createPrivateMsg(nick, m[1], m[2]));
                 continue;
             }
-            broadcastMessage(nick, s);
+            broadcastRequest(nick, RequestFactory.createGlobalMsg(nick, s));
         }
     }
 
     private void stop() throws IOException {
-        broadcastCommand(nick, Cmd.STOP);
+        broadcastRequest(nick, RequestFactory.createStop());
         authService.close();
         serverSocket.close();
         System.exit(0);
@@ -80,24 +82,21 @@ public class Server {
         clientHandler.handle();
     }
 
-    public void broadcastMessage(String sender, String msg) throws IOException {
-        broadcastCommand(sender, Cmd.MSG_GLOBAL, sender, msg);
-    }
-
-    public void broadcastCommand(String sender, String cmd, String... args) throws IOException {
-        if (!sender.equals(nick) && isNotClientCmd(cmd)) {
+    public void broadcastRequest(String sender, Request request) throws IOException {
+        System.out.printf("<%s>%s%n", sender, request.toString());
+        if (!sender.equals(nick) && isNotClientRequest(request.getType())) {
             return;
         }
         for (ClientHandler client : clients.values()) {
             if (client.getNick().equals(sender)) {
                 continue;
             }
-            client.sendCommand(cmd, args);
+            client.sendRequest(request);
         }
     }
 
-    private boolean isNotClientCmd(String cmd) {
-        return cmd.equals(Cmd.STOP) || cmd.equals(Cmd.BYE);
+    private boolean isNotClientRequest(RequestType type) {
+        return type == RequestType.STOP || type == RequestType.BYE || type == RequestType.KICK;
     }
 
     public AuthService getAuthService() {
@@ -121,31 +120,31 @@ public class Server {
     }
 
     public String[] getUsersList() {
-        String[] m = new String[clients.size() + 1];
-        m[0] = nick;
+        String[] users = new String[clients.size() + 1];
+        users[0] = nick;
         int i = 1;
         for (String nick : clients.keySet()) {
-            m[i++] = nick;
+            users[i++] = nick;
         }
-        return m;
+        return users;
     }
 
-    public void sendPrivateMessage(String sender, String recipient, String msg) throws IOException {
-        if (nick.equals(recipient)) {
-            System.out.printf("Private message from %s: %s%n", sender, msg);
+    public void sendPrivateMessage(String sender, PrivateMessageRequest request) throws IOException {
+        if (nick.equals(request.getRecipient())) {
+            System.out.printf("Private message from %s: %s%n", sender, request.getMsg());
             return;
         }
-        if (clients.containsKey(recipient)) {
-            clients.get(recipient).sendCommand(Cmd.MSG_PRIVATE, sender, msg);
+        if (clients.containsKey(request.getRecipient())) {
+            clients.get(request.getRecipient()).sendRequest(request);
             return;
         }
         if (nick.equals(sender)) {
-            System.out.printf("User with nick '%s' is missing%n", recipient);
+            System.out.printf("User with nick '%s' is missing%n", request.getRecipient());
             return;
         }
         if (clients.containsKey(sender)) {
-            clients.get(sender).sendCommand(Cmd.ERROR, "Message not sent",
-                    String.format("User with nick '%s' is missing", recipient));
+            clients.get(sender).sendRequest(RequestFactory.createError("Message not sent",
+                    String.format("User with nick '%s' is missing", request.getRecipient())));
         }
     }
 }
