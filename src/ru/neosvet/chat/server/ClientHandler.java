@@ -22,6 +22,7 @@ public class ClientHandler {
     private String nick = null;
     private int number;
     private boolean connected = false;
+    private Timer timer;
 
     public ClientHandler(Server srv, Socket clientSocket, int number) {
         this.srv = srv;
@@ -47,12 +48,9 @@ public class ClientHandler {
             }
         }).start();
     }
-
     private TimerTask task = new TimerTask() {
         @Override
         public void run() {
-            if (isAuthUser())
-                return;
             try {
                 connected = false;
                 sendRequest(RequestFactory.createKick());
@@ -63,13 +61,9 @@ public class ClientHandler {
         }
     };
 
-    private boolean isAuthUser() {
-        return number == 0;
-    }
-
     private void authentication() throws IOException {
-        Timer t = new Timer();
-        t.schedule(task, AUTH_TIMEOUT);
+        timer = new Timer();
+        timer.schedule(task, AUTH_TIMEOUT);
         while (true) {
             Request request = readRequest();
             if (request == null)
@@ -91,7 +85,7 @@ public class ClientHandler {
                             sendRequest(RequestFactory.createError("Auth", "Nick is busy"));
                         } else {
                             System.out.printf("User #%d auth as %s%n", number, nick);
-                            number = 0; //flag about auth user
+                            timer.cancel();
                             sendRequest(RequestFactory.createNick(nick));
                             sendRequest(RequestFactory.createList(srv.getUsersList()));
                             srv.broadcastRequest(nick, RequestFactory.createJoin(nick));
