@@ -37,7 +37,6 @@ public class Network {
             return;
         try {
             sendRequest(RequestFactory.createExit());
-            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
