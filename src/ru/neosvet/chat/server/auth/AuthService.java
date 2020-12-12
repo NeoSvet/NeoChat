@@ -1,7 +1,7 @@
 package ru.neosvet.chat.server.auth;
 
 public interface AuthService {
-    void start();
+    boolean start();
 
     String getNickByLoginAndPassword(String login, String password);
 
