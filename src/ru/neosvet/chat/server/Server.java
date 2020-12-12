@@ -35,13 +35,16 @@ public class Server {
         while (true) {
             String s = scan.nextLine();
             if (parser.parse(s)) {
-                if (parser.getResult().getType() == RequestType.STOP) {
-                    stop();
-                    break;
-                }
-                if (parser.getResult().getType() == RequestType.MSG_PRIVATE) {
-                    sendPrivateMessage(nick, (PrivateMessageRequest) parser.getResult());
-                    continue;
+                switch (parser.getResult().getType()) {
+                    case STOP:
+                        stop();
+                        return;
+                    case LIST:
+                        System.out.println(getUsersListToString());
+                        continue;
+                    case MSG_PRIVATE:
+                        sendPrivateMessage(nick, (PrivateMessageRequest) parser.getResult());
+                        continue;
                 }
                 if (parser.HasRecipient()) {
                     if (clients.containsKey(parser.getRecipient())) {
@@ -129,6 +132,15 @@ public class Server {
 
     public void unSubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler.getNick());
+    }
+
+    public String getUsersListToString() {
+        StringBuilder sb = new StringBuilder("User list:\n");
+        for (String nick : clients.keySet()) {
+            sb.append(nick);
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
     public String[] getUsersList() {

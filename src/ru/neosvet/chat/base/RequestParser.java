@@ -1,5 +1,7 @@
 package ru.neosvet.chat.base;
 
+import ru.neosvet.chat.base.requests.SampleRequest;
+
 public class RequestParser {
     private final String NICK_SERVER = "Server";
     private String owner;
@@ -40,6 +42,9 @@ public class RequestParser {
                     break;
                 case Cmd.EXIT:
                     result = RequestFactory.createExit();
+                    break;
+                case Cmd.LIST:
+                    result = new SampleRequest(RequestType.LIST);
                     break;
                 case Cmd.STOP:
                     if (!IsServer())

@@ -120,6 +120,10 @@ public class ClientHandler {
                 case MSG_GLOBAL:
                     srv.broadcastRequest(nick, request);
                     break;
+                case LIST:
+                    sendRequest(RequestFactory.createGlobalMsg(
+                            "SYSTEM", srv.getUsersListToString()));
+                    break;
             }
         }
     }
