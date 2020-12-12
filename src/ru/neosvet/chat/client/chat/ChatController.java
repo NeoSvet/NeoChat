@@ -10,6 +10,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.base.Const;
+import ru.neosvet.chat.base.RequestParser;
+import ru.neosvet.chat.base.RequestType;
+import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.client.Client;
 
 import java.io.IOException;
@@ -59,15 +62,6 @@ public class ChatController {
             return;
         }
         try {
-            if (selectedUser != null) {
-                showMessage(String.format("[PRIVATE TO]<%s>%s", selectedUser, msg));
-                client.sendPrivateMessage(selectedUser, msg);
-                tfMessage.clear();
-                return;
-            }
-            if (!msg.equals(Cmd.EXIT)) {
-                showMessage(String.format("<%s>%s", client.getMyNick(), msg));
-            }
             sendMessage(msg);
             tfMessage.clear();
         } catch (IOException e) {
@@ -104,7 +98,23 @@ public class ChatController {
     }
 
     private void sendMessage(String msg) throws IOException {
-        client.sendMessage(msg);
+        if (selectedUser != null) {
+            msg = Cmd.MSG_PRIVATE + " " + selectedUser + msg;
+        }
+        RequestParser parser = new RequestParser(client.getMyNick());
+        if (parser.parse(msg)) {
+            client.sendRequest(parser.getResult());
+            if (parser.getResult().getType() == RequestType.MSG_PRIVATE) {
+                PrivateMessageRequest pmr = (PrivateMessageRequest) parser.getResult();
+                showMessage(String.format("[PRIVATE TO]<%s>%s", pmr.getRecipient(), pmr.getMsg()));
+                return;
+            } else if (parser.getResult().getType() == RequestType.EXIT) {
+                return;
+            }
+        } else {
+            client.sendMessage(msg);
+        }
+        showMessage(String.format("<%s>%s", client.getMyNick(), msg));
     }
 
     public void setClient(Client client) {

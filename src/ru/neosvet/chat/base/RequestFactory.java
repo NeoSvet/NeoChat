@@ -2,8 +2,6 @@ package ru.neosvet.chat.base;
 
 import ru.neosvet.chat.base.requests.*;
 
-import java.util.Arrays;
-
 public class RequestFactory {
     public static Request createAuth(String login, String password) {
         return new AuthRequest(login, password);
@@ -53,12 +51,4 @@ public class RequestFactory {
         return new ListRequest(users);
     }
 
-    public static Request parse(String s) {
-        if (s.contains(" ")) {
-            /* TODO parse string to Request
-            String[] m = s.split(" ", 3);
-            return;*/
-        }
-        return null;
-    }
 }

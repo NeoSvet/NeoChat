@@ -51,13 +51,6 @@ public class Client extends Application {
     }
 
     public void sendMessage(String s) throws IOException {
-        if (s.startsWith("/")) { //is command
-            Request request = RequestFactory.parse(s);
-            if (request != null) {
-                sendRequest(request);
-                return;
-            }
-        }
         sendRequest(RequestFactory.createGlobalMsg(network.getNick(), s));
     }
 
@@ -138,10 +131,6 @@ public class Client extends Application {
                 chat.addUser(users[i]);
             }
         });
-    }
-
-    public void sendPrivateMessage(String recipient, String msg) throws IOException {
-        sendRequest(RequestFactory.createPrivateMsg(network.getNick(), recipient, msg));
     }
 
     public void disconnected() {

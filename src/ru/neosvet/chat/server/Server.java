@@ -1,10 +1,8 @@
 package ru.neosvet.chat.server;
 
 import ru.neosvet.chat.base.*;
-import ru.neosvet.chat.base.requests.MessageRequest;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.server.auth.AuthSQL;
-import ru.neosvet.chat.server.auth.AuthSample;
 import ru.neosvet.chat.server.auth.AuthService;
 
 import java.io.IOException;
@@ -33,15 +31,27 @@ public class Server {
 
     private void chat() throws IOException {
         Scanner scan = new Scanner(System.in);
+        RequestParser parser = new RequestParser(nick);
         while (true) {
             String s = scan.nextLine();
-            if (s.equals(Cmd.STOP)) {
-                stop();
-                return;
-            } else if (s.startsWith(Cmd.MSG_PRIVATE)) {
-                String[] m = s.split(" ", 3);
-                sendPrivateMessage(nick, (PrivateMessageRequest)
-                        RequestFactory.createPrivateMsg(nick, m[1], m[2]));
+            if (parser.parse(s)) {
+                if (parser.getResult().getType() == RequestType.STOP) {
+                    stop();
+                    break;
+                }
+                if (parser.getResult().getType() == RequestType.MSG_PRIVATE) {
+                    sendPrivateMessage(nick, (PrivateMessageRequest) parser.getResult());
+                    continue;
+                }
+                if (parser.HasRecipient()) {
+                    if (clients.containsKey(parser.getRecipient())) {
+                        clients.get(parser.getRecipient()).sendRequest(parser.getResult());
+                    } else {
+                        System.out.println("Command no sent: no recipient");
+                    }
+                    continue;
+                }
+                broadcastRequest(nick, parser.getResult());
                 continue;
             }
             broadcastRequest(nick, RequestFactory.createGlobalMsg(nick, s));
