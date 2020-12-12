@@ -3,6 +3,7 @@ package ru.neosvet.chat.server;
 import ru.neosvet.chat.base.*;
 import ru.neosvet.chat.base.requests.MessageRequest;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
+import ru.neosvet.chat.server.auth.AuthSQL;
 import ru.neosvet.chat.server.auth.AuthSample;
 import ru.neosvet.chat.server.auth.AuthService;
 
@@ -16,7 +17,7 @@ import java.util.Scanner;
 public class Server {
     private final String nick = "Server";
     private ServerSocket serverSocket;
-    private AuthService authService;
+    private AuthSQL authService;
     private int count_users = 0;
     private Map<String, ClientHandler> clients = new HashMap<>();
 
@@ -56,8 +57,9 @@ public class Server {
 
     public void start(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
-        this.authService = new AuthSample();
+        this.authService = new AuthSQL();
         authService.start();
+        authService.addDefaultUsers();
         System.out.println("Server started");
 
         new Thread(() -> {
