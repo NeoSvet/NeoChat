@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Server {
-    private final String nick = "Server";
+    public static final String NICK = "Server";
     private ServerSocket serverSocket;
     private AuthSQL authService;
     private int count_users = 0;
@@ -31,7 +31,7 @@ public class Server {
 
     private void chat() throws IOException {
         Scanner scan = new Scanner(System.in);
-        RequestParser parser = new RequestParser(nick);
+        RequestParser parser = new RequestParser(NICK);
         while (true) {
             String s = scan.nextLine();
             if (parser.parse(s)) {
@@ -43,7 +43,7 @@ public class Server {
                         System.out.println(getUsersListToString());
                         continue;
                     case MSG_PRIVATE:
-                        sendPrivateMessage(nick, (PrivateMessageRequest) parser.getResult());
+                        sendPrivateMessage(NICK, (PrivateMessageRequest) parser.getResult());
                         continue;
                 }
                 if (parser.HasRecipient()) {
@@ -54,15 +54,15 @@ public class Server {
                     }
                     continue;
                 }
-                broadcastRequest(nick, parser.getResult());
+                broadcastRequest(NICK, parser.getResult());
                 continue;
             }
-            broadcastRequest(nick, RequestFactory.createGlobalMsg(nick, s));
+            broadcastRequest(NICK, RequestFactory.createGlobalMsg(NICK, s));
         }
     }
 
     private void stop() throws IOException {
-        broadcastRequest(nick, RequestFactory.createStop());
+        broadcastRequest(NICK, RequestFactory.createStop());
         authService.close();
         serverSocket.close();
         System.exit(0);
@@ -99,7 +99,7 @@ public class Server {
 
     public void broadcastRequest(String sender, Request request) throws IOException {
         System.out.printf("<%s>%s%n", sender, request.toString());
-        if (!sender.equals(nick) && isNotClientRequest(request.getType())) {
+        if (!sender.equals(NICK) && isNotClientRequest(request.getType())) {
             return;
         }
         for (ClientHandler client : clients.values()) {
@@ -119,7 +119,7 @@ public class Server {
     }
 
     public boolean isNickBusy(String nick) {
-        if (nick.equals(this.nick))
+        if (nick.equals(this.NICK))
             return true;
         if (clients.containsKey(nick))
             return true;
@@ -145,7 +145,7 @@ public class Server {
 
     public String[] getUsersList() {
         String[] users = new String[clients.size() + 1];
-        users[0] = nick;
+        users[0] = NICK;
         int i = 1;
         for (String nick : clients.keySet()) {
             users[i++] = nick;
@@ -154,7 +154,7 @@ public class Server {
     }
 
     public void sendPrivateMessage(String sender, PrivateMessageRequest request) throws IOException {
-        if (nick.equals(request.getRecipient())) {
+        if (NICK.equals(request.getRecipient())) {
             System.out.printf("Private message from %s: %s%n", sender, request.getMsg());
             return;
         }
@@ -162,7 +162,7 @@ public class Server {
             clients.get(request.getRecipient()).sendRequest(request);
             return;
         }
-        if (nick.equals(sender)) {
+        if (NICK.equals(sender)) {
             System.out.printf("User with nick '%s' is missing%n", request.getRecipient());
             return;
         }

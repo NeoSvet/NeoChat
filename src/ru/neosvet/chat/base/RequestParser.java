@@ -1,9 +1,9 @@
 package ru.neosvet.chat.base;
 
 import ru.neosvet.chat.base.requests.SampleRequest;
+import ru.neosvet.chat.server.Server;
 
 public class RequestParser {
-    private final String NICK_SERVER = "Server";
     private String owner;
     private String recipient;
     private Request result;
@@ -66,6 +66,6 @@ public class RequestParser {
     }
 
     private boolean IsServer() {
-        return owner.equals(NICK_SERVER);
+        return owner.equals(Server.NICK);
     }
 }

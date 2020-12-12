@@ -122,7 +122,7 @@ public class ClientHandler {
                     break;
                 case LIST:
                     sendRequest(RequestFactory.createGlobalMsg(
-                            "SYSTEM", srv.getUsersListToString()));
+                            Server.NICK, srv.getUsersListToString()));
                     break;
             }
         }
