@@ -20,15 +20,15 @@ public class ClientHandler {
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private String nick = null;
-    private int number;
+    private int id;
     private boolean connected = false;
     private Timer timer;
 
-    public ClientHandler(Server srv, Socket clientSocket, int number) {
+    public ClientHandler(Server srv, Socket clientSocket, int id) {
         this.srv = srv;
         this.clientSocket = clientSocket;
-        this.number = number;
-        System.out.printf("User #%d connected!%n", number);
+        this.id = id;
+        System.out.printf("User #%d connected!%n", id);
     }
 
     public void handle() throws IOException {
@@ -69,7 +69,7 @@ public class ClientHandler {
             if (request == null)
                 continue;
 
-            //System.out.printf("Message from user #%d: %s%n", number, msg);
+            //System.out.printf("Message from user #%d: %s%n", id, msg);
             switch (request.getType()) {
                 case EXIT:
                     connected = false;
@@ -84,7 +84,7 @@ public class ClientHandler {
                         if (srv.isNickBusy(nick)) {
                             sendRequest(RequestFactory.createError("Auth", "Nick is busy"));
                         } else {
-                            System.out.printf("User #%d auth as %s%n", number, nick);
+                            System.out.printf("User #%d auth as %s%n", id, nick);
                             timer.cancel();
                             sendRequest(RequestFactory.createNick(nick));
                             sendRequest(RequestFactory.createList(srv.getUsersList()));
