@@ -16,10 +16,10 @@ public class AuthSample implements AuthService {
     }
 
     @Override
-    public String getNickByLoginAndPassword(String login, String password) {
+    public User getUser(String login, String password) {
         for (User client : clients) {
             if(client.getLogin().equals(login) && client.getPassword().equals(password)) {
-                return client.getNick();
+                return client;
             }
         }
         return null;

@@ -28,20 +28,21 @@ public class AuthSQL implements AuthService {
     }
 
     @Override
-    public String getNickByLoginAndPassword(String login, String password) {
-        String nick = null;
+    public User getUser(String login, String password) {
+        User client = null;
         try {
             ResultSet rs = stmt.executeQuery(String.format("SELECT password, nick FROM users WHERE login = '%s'", login));
             if(rs.isClosed()) //login is incorrect
                 return null;
             String passDB = rs.getString("password");
             if (passDB != null && passDB.equals(password)) {
-                nick = rs.getString("nick");
+                String nick = rs.getString("nick");
+                client = new User(login, password, nick);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return nick;
+        return client;
     }
 
     @Override

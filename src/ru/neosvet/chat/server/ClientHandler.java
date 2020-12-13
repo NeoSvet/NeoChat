@@ -5,6 +5,7 @@ import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.base.requests.AuthRequest;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.server.auth.AuthService;
+import ru.neosvet.chat.server.auth.User;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -79,8 +80,9 @@ public class ClientHandler {
                 case AUTH:
                     AuthRequest auth = (AuthRequest) request;
                     AuthService authService = srv.getAuthService();
-                    nick = authService.getNickByLoginAndPassword(auth.getLogin(), auth.getPassword());
-                    if (nick != null) {
+                    User user = authService.getUser(auth.getLogin(), auth.getPassword());
+                    if (user != null) {
+                        nick = user.getNick();
                         if (srv.isNickBusy(nick)) {
                             sendRequest(RequestFactory.createError("Auth", "Nick is busy"));
                         } else {
