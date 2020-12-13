@@ -137,6 +137,9 @@ public class Server {
     public String getUsersListToString() {
         StringBuilder sb = new StringBuilder("User list:\n");
         for (String nick : clients.keySet()) {
+            sb.append("id:");
+            sb.append(clients.get(nick).getId());
+            sb.append(" nick:");
             sb.append(nick);
             sb.append("\n");
         }

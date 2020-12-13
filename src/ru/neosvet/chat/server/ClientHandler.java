@@ -170,4 +170,8 @@ public class ClientHandler {
         out.writeObject(request);
         out.flush();
     }
+
+    public int getId() {
+        return id;
+    }
 }
