@@ -143,7 +143,6 @@ public class ChatController {
     }
 
     public void setFocus() {
-        System.out.println("set focus");
         tfMessage.requestFocus();
     }
 }
