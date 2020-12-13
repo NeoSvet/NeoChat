@@ -98,8 +98,8 @@ public class ChatController {
     }
 
     private void sendMessage(String msg) throws IOException {
-        if (selectedUser != null) {
-            msg = Cmd.MSG_PRIVATE + " " + selectedUser + msg;
+        if (selectedUser != null && !msg.startsWith("/")) {
+            msg = Cmd.MSG_PRIVATE + " " + selectedUser + " " + msg;
         }
         RequestParser parser = new RequestParser(client.getMyNick());
         if (parser.parse(msg)) {
