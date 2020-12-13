@@ -7,5 +7,7 @@ public interface AuthService {
 
     User getUser(String login, String password);
 
+    User getUser(int id);
+
     boolean changeNick(int id, String new_nick);
 }

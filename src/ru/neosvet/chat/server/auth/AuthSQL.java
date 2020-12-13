@@ -47,6 +47,24 @@ public class AuthSQL implements AuthService {
     }
 
     @Override
+    public User getUser(int id) {
+        User client = null;
+        try {
+            ResultSet rs = stmt.executeQuery(String.format("SELECT login, password, nick FROM users WHERE id = %d", id));
+            if (rs.isClosed()) //id is incorrect
+                return null;
+
+            String login = rs.getString("login");
+            String password = rs.getString("password");
+            String nick = rs.getString("nick");
+            client = new User(id, login, password, nick);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return client;
+    }
+
+    @Override
     public boolean changeNick(int id, String new_nick) {
         try {
             ResultSet rs = stmt.executeQuery(String.format("SELECT login FROM users WHERE nick = '%s'", new_nick));

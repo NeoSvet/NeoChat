@@ -4,6 +4,7 @@ import ru.neosvet.chat.base.*;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.server.auth.AuthSQL;
 import ru.neosvet.chat.server.auth.AuthService;
+import ru.neosvet.chat.server.auth.User;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -34,6 +35,9 @@ public class Server {
         RequestParser parser = new RequestParser(NICK);
         while (true) {
             String s = scan.nextLine();
+            if (s.contains(Cmd.ID)) {
+                s = replaceIdToNick(s);
+            }
             if (parser.parse(s)) {
                 switch (parser.getResult().getType()) {
                     case STOP:
@@ -59,6 +63,26 @@ public class Server {
             }
             broadcastRequest(NICK, RequestFactory.createGlobalMsg(NICK, s));
         }
+    }
+
+    private String replaceIdToNick(String s) {
+        String[] m = s.split(" ");
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < m.length; i++) {
+                if (m[i].startsWith(Cmd.ID)) {
+                    int id = Integer.parseInt(m[i].substring(Cmd.ID.length()));
+                    User user = authService.getUser(id);
+                    sb.append(user.getNick());
+                } else
+                    sb.append(m[i]);
+                if (i < m.length - 1)
+                    sb.append(" ");
+            }
+            return sb.toString();
+        } catch (Exception e) {
+        }
+        return s;
     }
 
     private void stop() throws IOException {
