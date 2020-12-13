@@ -98,6 +98,7 @@ public class Client extends Application {
         Platform.runLater(() -> {
             authStage.close();
             chatStage.setTitle("Chat: " + network.getNick());
+            chat.setFocus();
         });
         showMessage("You connected as " + network.getNick());
     }

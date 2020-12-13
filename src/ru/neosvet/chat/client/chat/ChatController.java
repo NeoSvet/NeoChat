@@ -141,4 +141,9 @@ public class ChatController {
         }
         showMessage(String.format("User %s renamed to %s", old_nick, new_nick));
     }
+
+    public void setFocus() {
+        System.out.println("set focus");
+        tfMessage.requestFocus();
+    }
 }
