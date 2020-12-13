@@ -27,6 +27,10 @@ public class RequestFactory {
         return new MessageRequest(RequestType.MSG_GLOBAL, sender, msg);
     }
 
+    public static Request createRename(String old_nick, String new_nick) {
+        return new MessageRequest(RequestType.RENAME, old_nick, new_nick);
+    }
+
     public static Request createPrivateMsg(String sender, String recipient, String msg) {
         return new PrivateMessageRequest(sender, recipient, msg);
     }

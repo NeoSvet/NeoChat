@@ -4,6 +4,7 @@ import ru.neosvet.chat.base.Request;
 import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.base.requests.AuthRequest;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
+import ru.neosvet.chat.base.requests.UserRequest;
 import ru.neosvet.chat.server.auth.AuthService;
 import ru.neosvet.chat.server.auth.User;
 
@@ -123,6 +124,16 @@ public class ClientHandler {
                     break;
                 case MSG_GLOBAL:
                     srv.broadcastRequest(nick, request);
+                    break;
+                case NICK:
+                    UserRequest user = (UserRequest) request;
+                    if (srv.getAuthService().changeNick(id, user.getNick())) {
+                        srv.changeNick(nick, user.getNick());
+                        nick = user.getNick();;
+                        sendRequest(user);
+                    } else {
+                        sendRequest(RequestFactory.createError("Error", "Nick is busy"));
+                    }
                     break;
                 case LIST:
                     sendRequest(RequestFactory.createGlobalMsg(

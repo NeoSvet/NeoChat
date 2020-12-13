@@ -88,6 +88,9 @@ public class Network {
                         case LEFT:
                             client.leftUser(getNickFromRequest(request));
                             break;
+                        case RENAME:
+                            client.renameUser((MessageRequest) request);
+                            break;
                         case MSG_GLOBAL:
                             MessageRequest mr = (MessageRequest) request;
                             client.showMessage(String.format("<%s>%s", mr.getOwner(), mr.getMsg()));

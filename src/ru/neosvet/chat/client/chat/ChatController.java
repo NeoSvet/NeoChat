@@ -131,4 +131,14 @@ public class ChatController {
     public void reset() {
         lvUsers.getItems().clear();
     }
+
+    public void renameUser(String old_nick, String new_nick) {
+        for (int i = 0; i < lvUsers.getItems().size(); i++) {
+            if (lvUsers.getItems().get(i).equals(old_nick)) {
+                lvUsers.getItems().set(i, new_nick);
+                break;
+            }
+        }
+        showMessage(String.format("User %s renamed to %s", old_nick, new_nick));
+    }
 }

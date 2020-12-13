@@ -46,6 +46,9 @@ public class RequestParser {
                 case Cmd.LIST:
                     result = new SampleRequest(RequestType.LIST);
                     break;
+                case Cmd.NICK:
+                    result = RequestFactory.createNick(m[1]);
+                    break;
                 case Cmd.STOP:
                     if (!IsServer())
                         return false;

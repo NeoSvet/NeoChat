@@ -47,6 +47,23 @@ public class AuthSQL implements AuthService {
     }
 
     @Override
+    public boolean changeNick(int id, String new_nick) {
+        try {
+            ResultSet rs = stmt.executeQuery(String.format("SELECT login FROM users WHERE nick = '%s'", new_nick));
+            if (!rs.isClosed()) { //nick is busy
+                rs.close();
+                return false;
+            }
+
+            int result = stmt.executeUpdate(String.format("UPDATE users SET nick = '%s' WHERE id = %d", new_nick, id));
+            return result == 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public void close() {
         try {
             stmt.close();

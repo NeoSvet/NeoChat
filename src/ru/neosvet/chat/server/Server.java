@@ -171,4 +171,11 @@ public class Server {
                     String.format("User with nick '%s' is missing", request.getRecipient())));
         }
     }
+
+    public void changeNick(String old_nick, String new_nick) throws IOException {
+        ClientHandler client = clients.get(old_nick);
+        broadcastRequest(old_nick, RequestFactory.createRename(old_nick, new_nick));
+        clients.remove(old_nick);
+        clients.put(new_nick, client);
+    }
 }

@@ -18,11 +18,26 @@ public class AuthSample implements AuthService {
     @Override
     public User getUser(String login, String password) {
         for (User client : clients) {
-            if(client.getLogin().equals(login) && client.getPassword().equals(password)) {
+            if (client.getLogin().equals(login) && client.getPassword().equals(password)) {
                 return client;
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean changeNick(int id, String new_nick) {
+        User user = null;
+        for (User client : clients) {
+            if (client.getNick().equals(new_nick))
+                return false;
+            if (client.getId() == id)
+                user = client;
+        }
+        if (user == null)
+            return false;
+        user.setNick(new_nick);
+        return true;
     }
 
     @Override

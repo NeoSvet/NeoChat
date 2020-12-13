@@ -11,6 +11,7 @@ public enum RequestType {
     BYE,
     KICK,
     NICK,
+    RENAME,
     MSG_PRIVATE,
     MSG_GLOBAL
 }
