@@ -8,9 +8,9 @@ public class AuthSample implements AuthService {
 
     @Override
     public boolean start() {
-        clients.add(new User("user1", "1111", "Борис_Николаевич"));
-        clients.add(new User("user2", "2222", "Мартин_Некотов"));
-        clients.add(new User("user3", "3333", "Гендальф_Серый"));
+        clients.add(new User(1, "user1", "1111", "Борис_Николаевич"));
+        clients.add(new User(2, "user2", "2222", "Мартин_Некотов"));
+        clients.add(new User(3, "user3", "3333", "Гендальф_Серый"));
         System.out.println("AuthService started");
         return true;
     }

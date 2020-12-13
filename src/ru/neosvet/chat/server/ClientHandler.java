@@ -82,6 +82,7 @@ public class ClientHandler {
                     AuthService authService = srv.getAuthService();
                     User user = authService.getUser(auth.getLogin(), auth.getPassword());
                     if (user != null) {
+                        id = user.getId();
                         nick = user.getNick();
                         if (srv.isNickBusy(nick)) {
                             sendRequest(RequestFactory.createError("Auth", "Nick is busy"));

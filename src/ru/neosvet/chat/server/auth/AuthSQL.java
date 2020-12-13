@@ -36,8 +36,9 @@ public class AuthSQL implements AuthService {
                 return null;
             String passDB = rs.getString("password");
             if (passDB != null && passDB.equals(password)) {
+                int id = rs.getInt("id");
                 String nick = rs.getString("nick");
-                client = new User(login, password, nick);
+                client = new User(id, login, password, nick);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -58,9 +59,9 @@ public class AuthSQL implements AuthService {
     public void addDefaultUsers() {
         try {
             User[] users = new User[]{
-                    new User("user1", "1111", "Борис_Николаевич"),
-                    new User("user2", "2222", "Мартин_Некотов"),
-                    new User("user3", "3333", "Гендальф_Серый")
+                    new User(1, "user1", "1111", "Борис_Николаевич"),
+                    new User(2, "user2", "2222", "Мартин_Некотов"),
+                    new User(3, "user3", "3333", "Гендальф_Серый")
             };
 
             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO users (login, password, nick) VALUES (?, ?, ?)");
