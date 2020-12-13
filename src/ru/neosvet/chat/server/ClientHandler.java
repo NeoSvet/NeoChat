@@ -49,6 +49,7 @@ public class ClientHandler {
             }
         }).start();
     }
+
     private TimerTask task = new TimerTask() {
         @Override
         public void run() {
@@ -82,12 +83,12 @@ public class ClientHandler {
                     AuthService authService = srv.getAuthService();
                     User user = authService.getUser(auth.getLogin(), auth.getPassword());
                     if (user != null) {
-                        id = user.getId();
                         nick = user.getNick();
                         if (srv.isNickBusy(nick)) {
-                            sendRequest(RequestFactory.createError("Auth", "Nick is busy"));
+                            sendRequest(RequestFactory.createError("Auth", "User is busy"));
                         } else {
-                            System.out.printf("User #%d auth as %s%n", id, nick);
+                            System.out.printf("User #%d auth as %s (id %d)%n", id, nick, user.getId());
+                            id = user.getId();
                             timer.cancel();
                             sendRequest(RequestFactory.createNick(nick));
                             sendRequest(RequestFactory.createList(srv.getUsersList()));

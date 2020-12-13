@@ -31,8 +31,8 @@ public class AuthSQL implements AuthService {
     public User getUser(String login, String password) {
         User client = null;
         try {
-            ResultSet rs = stmt.executeQuery(String.format("SELECT password, nick FROM users WHERE login = '%s'", login));
-            if(rs.isClosed()) //login is incorrect
+            ResultSet rs = stmt.executeQuery(String.format("SELECT id, password, nick FROM users WHERE login = '%s'", login));
+            if (rs.isClosed()) //login is incorrect
                 return null;
             String passDB = rs.getString("password");
             if (passDB != null && passDB.equals(password)) {
