@@ -37,8 +37,8 @@ public class RequestParser {
                 case Cmd.MSG_PRIVATE:
                     result = RequestFactory.createPrivateMsg(owner, m[1], m[2]);
                     break;
-                case Cmd.MSG_GLOBAL:
-                    result = RequestFactory.createGlobalMsg(owner, m[1]);
+                case Cmd.MSG_PUBLIC:
+                    result = RequestFactory.createPublicMsg(owner, m[1]);
                     break;
                 case Cmd.EXIT:
                     result = RequestFactory.createExit();

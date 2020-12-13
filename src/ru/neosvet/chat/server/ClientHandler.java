@@ -122,7 +122,7 @@ public class ClientHandler {
                     srv.sendPrivateMessage(nick,
                             (PrivateMessageRequest) request);
                     break;
-                case MSG_GLOBAL:
+                case MSG_PUBLIC:
                     srv.broadcastRequest(nick, request);
                     break;
                 case NICK:
@@ -136,7 +136,7 @@ public class ClientHandler {
                     }
                     break;
                 case LIST:
-                    sendRequest(RequestFactory.createGlobalMsg(
+                    sendRequest(RequestFactory.createPublicMsg(
                             Server.NICK, srv.getUsersListToString()));
                     break;
             }

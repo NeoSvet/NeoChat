@@ -30,7 +30,7 @@ public class ChatController {
     @FXML
     private ListView<String> lvUsers;
 
-    private final String SEND_GLOBAL = "Send global message";
+    private final String SEND_PUBLIC = "Send public message";
     private Client client;
     private String selectedUser = null;
 
@@ -38,7 +38,7 @@ public class ChatController {
     @FXML
     public void initialize() {
         initEventSelectUser();
-        lPrivate.setText(SEND_GLOBAL);
+        lPrivate.setText(SEND_PUBLIC);
     }
 
     private void initEventSelectUser() {
@@ -125,7 +125,7 @@ public class ChatController {
     public void unSelectUser(ActionEvent actionEvent) {
         selectedUser = null;
         lvUsers.getSelectionModel().clearSelection();
-        lPrivate.setText(SEND_GLOBAL);
+        lPrivate.setText(SEND_PUBLIC);
     }
 
     public void reset() {

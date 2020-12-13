@@ -14,5 +14,5 @@ public interface Cmd {
     String NICK = "/nick";
     String ID = "/id";
     String MSG_PRIVATE = "/w";
-    String MSG_GLOBAL = "/m";
+    String MSG_PUBLIC = "/m";
 }

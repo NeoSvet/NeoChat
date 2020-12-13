@@ -23,8 +23,8 @@ public class RequestFactory {
         return new SampleRequest(RequestType.KICK);
     }
 
-    public static Request createGlobalMsg(String sender, String msg) {
-        return new MessageRequest(RequestType.MSG_GLOBAL, sender, msg);
+    public static Request createPublicMsg(String sender, String msg) {
+        return new MessageRequest(RequestType.MSG_PUBLIC, sender, msg);
     }
 
     public static Request createRename(String old_nick, String new_nick) {

@@ -13,5 +13,5 @@ public enum RequestType {
     NICK,
     RENAME,
     MSG_PRIVATE,
-    MSG_GLOBAL
+    MSG_PUBLIC
 }

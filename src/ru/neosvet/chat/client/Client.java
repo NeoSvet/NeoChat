@@ -52,7 +52,7 @@ public class Client extends Application {
     }
 
     public void sendMessage(String s) throws IOException {
-        sendRequest(RequestFactory.createGlobalMsg(network.getNick(), s));
+        sendRequest(RequestFactory.createPublicMsg(network.getNick(), s));
     }
 
     public void connect(String host, int port) throws IOException {

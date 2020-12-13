@@ -61,7 +61,7 @@ public class Server {
                 broadcastRequest(NICK, parser.getResult());
                 continue;
             }
-            broadcastRequest(NICK, RequestFactory.createGlobalMsg(NICK, s));
+            broadcastRequest(NICK, RequestFactory.createPublicMsg(NICK, s));
         }
     }
 

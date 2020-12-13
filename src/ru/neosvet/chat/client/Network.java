@@ -91,7 +91,7 @@ public class Network {
                         case RENAME:
                             client.renameUser((MessageRequest) request);
                             break;
-                        case MSG_GLOBAL:
+                        case MSG_PUBLIC:
                             MessageRequest mr = (MessageRequest) request;
                             client.showMessage(String.format("<%s>%s", mr.getOwner(), mr.getMsg()));
                             break;
