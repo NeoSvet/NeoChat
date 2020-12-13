@@ -122,7 +122,7 @@ public class Server {
     }
 
     public void broadcastRequest(String sender, Request request) throws IOException {
-        System.out.printf("<%s>%s%n", sender, request.toString());
+        System.out.printf("<%s>%s%n", getIdByNick(sender), request.toString());
         if (!sender.equals(NICK) && isNotClientRequest(request.getType())) {
             return;
         }
@@ -132,6 +132,12 @@ public class Server {
             }
             client.sendRequest(request);
         }
+    }
+
+    private String getIdByNick(String nick) {
+        if (!clients.containsKey(nick))
+            return nick;
+        return "id:" + clients.get(nick).getId();
     }
 
     private boolean isNotClientRequest(RequestType type) {
