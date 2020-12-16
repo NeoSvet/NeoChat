@@ -44,7 +44,10 @@ public class Client extends Application {
         chat = loader.getController();
         chat.setClient(this);
 
-        primaryStage.setOnCloseRequest(windowEvent -> network.close());
+        primaryStage.setOnCloseRequest(windowEvent -> {
+            network.close();
+            chat.close();
+        });
     }
 
     public void showErrorMessage(String title, String msg) {
@@ -106,6 +109,12 @@ public class Client extends Application {
     public void showMessage(String msg) {
         Platform.runLater(() -> {
             chat.showMessage(msg);
+        });
+    }
+
+    public void showMessage(String owner, String msg) {
+        Platform.runLater(() -> {
+            chat.showMessage(owner, msg);
         });
     }
 

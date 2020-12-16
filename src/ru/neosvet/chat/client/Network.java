@@ -93,7 +93,7 @@ public class Network {
                             break;
                         case MSG_PUBLIC:
                             MessageRequest mr = (MessageRequest) request;
-                            client.showMessage(String.format("<%s>%s", mr.getOwner(), mr.getMsg()));
+                            client.showMessage(mr.getOwner(), mr.getMsg());
                             break;
                         case MSG_PRIVATE:
                             PrivateMessageRequest pmr = (PrivateMessageRequest) request;
