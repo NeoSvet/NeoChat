@@ -1,6 +1,10 @@
 package ru.neosvet.chat.server;
 
 import ru.neosvet.chat.base.*;
+import ru.neosvet.chat.base.log.LogSQL;
+import ru.neosvet.chat.base.log.Logger;
+import ru.neosvet.chat.base.log.Record;
+import ru.neosvet.chat.base.requests.MessageRequest;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.server.auth.AuthSQL;
 import ru.neosvet.chat.server.auth.AuthService;
@@ -9,16 +13,22 @@ import ru.neosvet.chat.server.auth.User;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Server {
     public static final String NICK = "Server";
+    private final String PATH_LOG = "jdbc:sqlite:src/ru/neosvet/chat/server/chat.db";
+    private final int LOG_LIMIT = 100;
     private ServerSocket serverSocket;
     private AuthSQL authService;
     private int count_users = 0;
     private Map<String, ClientHandler> clients = new HashMap<>();
+    private Logger logger;
 
     public static void main(String[] args) {
         try {
@@ -87,6 +97,11 @@ public class Server {
 
     private void stop() throws IOException {
         broadcastRequest(NICK, RequestFactory.createStop());
+        try {
+            logger.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         authService.close();
         serverSocket.close();
         System.exit(0);
@@ -98,6 +113,14 @@ public class Server {
         authService.start();
         authService.addDefaultUsers();
         System.out.println("Server started");
+        logger = new LogSQL();
+        try {
+            logger.start( PATH_LOG, LOG_LIMIT);
+            showLog();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Logger could not start: " + e.getMessage());
+        }
 
         new Thread(() -> {
             try {
@@ -113,6 +136,26 @@ public class Server {
         chat();
     }
 
+    private void showLog() throws Exception {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss]");
+        String curDate = dateFormat.format(Date.from(Instant.now()));
+        String newDate;
+        for (Record record : logger.getLastRecords(LOG_LIMIT)) {
+            newDate = dateFormat.format(record.getDate());
+            if (!curDate.equals(newDate)) {
+                curDate = newDate;
+                System.out.println("______" + newDate + "______");
+            }
+            System.out.print(timeFormat.format(record.getDate()));
+            if (record.hasOwner()) {
+                System.out.printf("<%s>%s%n", record.getOwner(), record.getMsg());
+            } else {
+                System.out.printf("%s%n", record.getMsg());
+            }
+        }
+    }
+
     private void waitNewConnection() throws IOException {
         System.out.println("Waiting for connection...");
         Socket clientSocket = serverSocket.accept();
@@ -122,6 +165,14 @@ public class Server {
     }
 
     public void broadcastRequest(String sender, Request request) throws IOException {
+        if (request.getType() == RequestType.MSG_PUBLIC) {
+            MessageRequest msg = (MessageRequest) request;
+            try {
+                logger.append(msg.getOwner(), msg.getMsg());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         System.out.printf("<%s>%s%n", getIdByNick(sender), request.toString());
         if (!sender.equals(NICK) && isNotClientRequest(request.getType())) {
             return;
@@ -210,5 +261,9 @@ public class Server {
         broadcastRequest(old_nick, RequestFactory.createRename(old_nick, new_nick));
         clients.remove(old_nick);
         clients.put(new_nick, client);
+    }
+
+    public void sendHistoryTo(ClientHandler client) {
+
     }
 }
