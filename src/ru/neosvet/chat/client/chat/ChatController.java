@@ -8,16 +8,24 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import ru.neosvet.chat.base.*;
+import ru.neosvet.chat.base.Cmd;
+import ru.neosvet.chat.base.Const;
+import ru.neosvet.chat.base.RequestParser;
+import ru.neosvet.chat.base.RequestType;
+import ru.neosvet.chat.base.log.Logger;
+import ru.neosvet.chat.base.log.Record;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.client.Client;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
+import java.util.Date;
 
 public class ChatController {
     private SimpleDateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss]");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     @FXML
     private TextField tfMessage;
     @FXML
@@ -27,6 +35,7 @@ public class ChatController {
     @FXML
     private ListView<String> lvUsers;
 
+    private final int LOG_LIMIT = 100;
     private final String SEND_PUBLIC = "Send public message";
     private final String PATH_LOG = "/src/ru/neosvet/chat/client";
     private Client client;
@@ -38,9 +47,24 @@ public class ChatController {
     public void initialize() {
         initEventSelectUser();
         lPrivate.setText(SEND_PUBLIC);
-        logger = new Logger(System.getProperty("user.dir") + PATH_LOG, 100);
+        logger = new Logger(System.getProperty("user.dir") + PATH_LOG, LOG_LIMIT);
         try {
             logger.start();
+            String curDate = dateFormat.format(Date.from(Instant.now()));
+            String newDate;
+            for (Record record : logger.getLastRecords(LOG_LIMIT)) {
+                newDate = dateFormat.format(record.getDate());
+                if (!curDate.equals(newDate)) {
+                    curDate = newDate;
+                    taChat.appendText("______" + newDate + "______\n");
+                }
+                taChat.appendText(timeFormat.format(record.getDate()));
+                if (record.hasOwner()) {
+                    taChat.appendText(String.format("<%s>%s%n", record.getOwner(), record.getMsg()));
+                } else {
+                    taChat.appendText(String.format("%s%n", record.getMsg()));
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
             showMessage("Logger could not start: " + e.getMessage());
