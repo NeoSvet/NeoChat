@@ -13,6 +13,7 @@ public interface Cmd {
     String KICK = "/kick";
     String NICK = "/nick";
     String ID = "/id";
+    String LOG = "/log";
     String MSG_PRIVATE = "/w";
     String MSG_PUBLIC = "/m";
 }

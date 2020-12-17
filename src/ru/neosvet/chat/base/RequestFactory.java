@@ -1,6 +1,9 @@
 package ru.neosvet.chat.base;
 
+import ru.neosvet.chat.base.log.Record;
 import ru.neosvet.chat.base.requests.*;
+
+import java.util.ArrayList;
 
 public class RequestFactory {
     public static Request createAuth(String login, String password) {
@@ -53,6 +56,14 @@ public class RequestFactory {
 
     public static Request createList(String[] users) {
         return new ListRequest(users);
+    }
+
+    public static Request createLog(int count) {
+        return new LogRequest(count);
+    }
+
+    public static Request createRecords(ArrayList<Record> records) {
+        return new RecordsRequest(records);
     }
 
 }

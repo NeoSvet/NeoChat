@@ -1,8 +1,9 @@
 package ru.neosvet.chat.base.log;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Record {
+public class Record implements Serializable {
     private Date date;
     private String owner;
     private String msg;

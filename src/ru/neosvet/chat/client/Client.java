@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import ru.neosvet.chat.base.Request;
 import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.base.requests.MessageRequest;
+import ru.neosvet.chat.base.requests.RecordsRequest;
 import ru.neosvet.chat.client.auth.AuthController;
 import ru.neosvet.chat.client.chat.ChatController;
 
@@ -154,6 +155,12 @@ public class Client extends Application {
     public void renameUser(MessageRequest request) {
         Platform.runLater(() -> {
             chat.renameUser(request.getOwner(), request.getMsg());
+        });
+    }
+
+    public void showRecords(RecordsRequest request) {
+        Platform.runLater(() -> {
+            chat.showRecords(request.getRecords());
         });
     }
 }

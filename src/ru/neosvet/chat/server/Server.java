@@ -4,6 +4,7 @@ import ru.neosvet.chat.base.*;
 import ru.neosvet.chat.base.log.LogSQL;
 import ru.neosvet.chat.base.log.Logger;
 import ru.neosvet.chat.base.log.Record;
+import ru.neosvet.chat.base.requests.LogRequest;
 import ru.neosvet.chat.base.requests.MessageRequest;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.server.auth.AuthSQL;
@@ -15,10 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Server {
     public static final String NICK = "Server";
@@ -58,6 +56,15 @@ public class Server {
                         continue;
                     case MSG_PRIVATE:
                         sendPrivateMessage(NICK, (PrivateMessageRequest) parser.getResult());
+                        continue;
+                    case LOG:
+                        LogRequest lr = (LogRequest) parser.getResult();
+                        try {
+                            showLog(lr.getCount());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.out.println("Error: Failed to get records");
+                        }
                         continue;
                 }
                 if (parser.HasRecipient()) {
@@ -115,8 +122,7 @@ public class Server {
         System.out.println("Server started");
         logger = new LogSQL();
         try {
-            logger.start( PATH_LOG, LOG_LIMIT);
-            showLog();
+            logger.start(PATH_LOG, LOG_LIMIT);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Logger could not start: " + e.getMessage());
@@ -136,12 +142,12 @@ public class Server {
         chat();
     }
 
-    private void showLog() throws Exception {
+    private void showLog(int count) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         SimpleDateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss]");
         String curDate = dateFormat.format(Date.from(Instant.now()));
         String newDate;
-        for (Record record : logger.getLastRecords(LOG_LIMIT)) {
+        for (Record record : logger.getLastRecords(count)) {
             newDate = dateFormat.format(record.getDate());
             if (!curDate.equals(newDate)) {
                 curDate = newDate;
@@ -263,7 +269,7 @@ public class Server {
         clients.put(new_nick, client);
     }
 
-    public void sendHistoryTo(ClientHandler client) {
-
+    public ArrayList<Record> getChatHistory(int count) throws Exception {
+        return logger.getLastRecords(count);
     }
 }

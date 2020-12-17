@@ -49,6 +49,9 @@ public class RequestParser {
                 case Cmd.NICK:
                     result = RequestFactory.createNick(m[1]);
                     break;
+                case Cmd.LOG:
+                    result = RequestFactory.createLog(Integer.parseInt(m[1]));
+                    break;
                 case Cmd.STOP:
                     if (!IsServer())
                         return false;

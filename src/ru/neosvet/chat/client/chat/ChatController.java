@@ -21,6 +21,7 @@ import ru.neosvet.chat.client.Client;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -51,24 +52,28 @@ public class ChatController {
         logger = new LogFile();
         try {
             logger.start(System.getProperty("user.dir") + PATH_LOG, LOG_LIMIT);
-            String curDate = dateFormat.format(Date.from(Instant.now()));
-            String newDate;
-            for (Record record : logger.getLastRecords(LOG_LIMIT)) {
-                newDate = dateFormat.format(record.getDate());
-                if (!curDate.equals(newDate)) {
-                    curDate = newDate;
-                    taChat.appendText("______" + newDate + "______\n");
-                }
-                taChat.appendText(timeFormat.format(record.getDate()));
-                if (record.hasOwner()) {
-                    taChat.appendText(String.format("<%s>%s%n", record.getOwner(), record.getMsg()));
-                } else {
-                    taChat.appendText(String.format("%s%n", record.getMsg()));
-                }
-            }
+            showRecords(logger.getLastRecords(LOG_LIMIT));
         } catch (Exception e) {
             e.printStackTrace();
             showMessage("Logger could not start: " + e.getMessage());
+        }
+    }
+
+    public void showRecords(ArrayList<Record> records) {
+        String curDate = dateFormat.format(Date.from(Instant.now()));
+        String newDate;
+        for (Record record : records) {
+            newDate = dateFormat.format(record.getDate());
+            if (!curDate.equals(newDate)) {
+                curDate = newDate;
+                taChat.appendText("______" + newDate + "______\n");
+            }
+            taChat.appendText(timeFormat.format(record.getDate()));
+            if (record.hasOwner()) {
+                taChat.appendText(String.format("<%s>%s%n", record.getOwner(), record.getMsg()));
+            } else {
+                taChat.appendText(String.format("%s%n", record.getMsg()));
+            }
         }
     }
 
