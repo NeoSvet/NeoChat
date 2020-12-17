@@ -152,7 +152,7 @@ public class ChatController {
             client.sendRequest(parser.getResult());
             if (parser.getResult().getType() == RequestType.MSG_PRIVATE) {
                 PrivateMessageRequest pmr = (PrivateMessageRequest) parser.getResult();
-                showMessage(String.format("[PRIVATE TO]<%s>%s", pmr.getRecipient(), pmr.getMsg()));
+                showMessage(client.getMyNick(), String.format("[PRIVATE TO %s]%s", pmr.getRecipient(), pmr.getMsg()));
                 return;
             } else if (parser.getResult().getType() == RequestType.EXIT) {
                 return;

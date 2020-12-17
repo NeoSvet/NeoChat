@@ -97,7 +97,7 @@ public class Network {
                             break;
                         case MSG_PRIVATE:
                             PrivateMessageRequest pmr = (PrivateMessageRequest) request;
-                            client.showMessage(String.format("[PRIVATE FROM]<%s>%s", pmr.getSender(), pmr.getMsg()));
+                            client.showMessage(pmr.getSender(), "[PRIVATE]" + pmr.getMsg());
                             break;
                         default:
                             client.showMessage("[ERROR]Unknown request: " + request.getType());
