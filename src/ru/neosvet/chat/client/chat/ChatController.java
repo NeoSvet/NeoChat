@@ -12,6 +12,7 @@ import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.base.RequestParser;
 import ru.neosvet.chat.base.RequestType;
+import ru.neosvet.chat.base.log.LogFile;
 import ru.neosvet.chat.base.log.Logger;
 import ru.neosvet.chat.base.log.Record;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
@@ -47,9 +48,9 @@ public class ChatController {
     public void initialize() {
         initEventSelectUser();
         lPrivate.setText(SEND_PUBLIC);
-        logger = new Logger(System.getProperty("user.dir") + PATH_LOG, LOG_LIMIT);
+        logger = new LogFile();
         try {
-            logger.start();
+            logger.start(System.getProperty("user.dir") + PATH_LOG, LOG_LIMIT);
             String curDate = dateFormat.format(Date.from(Instant.now()));
             String newDate;
             for (Record record : logger.getLastRecords(LOG_LIMIT)) {
@@ -65,7 +66,7 @@ public class ChatController {
                     taChat.appendText(String.format("%s%n", record.getMsg()));
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             showMessage("Logger could not start: " + e.getMessage());
         }
@@ -103,7 +104,7 @@ public class ChatController {
     public void showMessage(String msg) {
         try {
             logger.append("", msg);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error by logger.append");
         }
@@ -113,7 +114,7 @@ public class ChatController {
     public void showMessage(String owner, String msg) {
         try {
             logger.append(owner, msg);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error by logger.append");
         }
@@ -195,7 +196,7 @@ public class ChatController {
     public void close() {
         try {
             logger.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
