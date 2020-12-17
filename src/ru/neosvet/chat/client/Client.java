@@ -160,7 +160,7 @@ public class Client extends Application {
 
     public void showRecords(RecordsRequest request) {
         Platform.runLater(() -> {
-            chat.showRecords(request.getRecords());
+            chat.showRecords(request.getRecords(), "HISTORY FROM SERVER");
         });
     }
 }

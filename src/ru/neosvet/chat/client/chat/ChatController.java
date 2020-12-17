@@ -52,14 +52,15 @@ public class ChatController {
         logger = new LogFile();
         try {
             logger.start(System.getProperty("user.dir") + PATH_LOG, LOG_LIMIT);
-            showRecords(logger.getLastRecords(LOG_LIMIT));
+            showRecords(logger.getLastRecords(LOG_LIMIT), "LOCAL HISTORY");
         } catch (Exception e) {
             e.printStackTrace();
             showMessage("Logger could not start: " + e.getMessage());
         }
     }
 
-    public void showRecords(ArrayList<Record> records) {
+    public void showRecords(ArrayList<Record> records, String title) {
+        taChat.appendText("______ START " + title + "______\n");
         String curDate = dateFormat.format(Date.from(Instant.now()));
         String newDate;
         for (Record record : records) {
@@ -75,6 +76,7 @@ public class ChatController {
                 taChat.appendText(String.format("%s%n", record.getMsg()));
             }
         }
+        taChat.appendText("______ END " + title + "______\n");
     }
 
     private void initEventSelectUser() {
