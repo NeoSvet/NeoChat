@@ -8,9 +8,9 @@ public class LogSQL implements Logger {
     private final String TIME = "time", OWNER = "owner", MSG = "msg";
     private Connection connection;
     private Statement stmt;
-    private int limit;
+    private int limit, count, min_id;
     private boolean started = false;
-    private PreparedStatement newRecord, getRecords;
+    private PreparedStatement newRecord, getRecords, deleteRecords;
 
     @Override
     public void start(String path, int limit) throws Exception {
@@ -26,6 +26,14 @@ public class LogSQL implements Logger {
         stmt.execute(sql);
         newRecord = connection.prepareStatement("INSERT INTO records (time, owner, msg) VALUES (?, ?, ?);");
         getRecords = connection.prepareStatement("SELECT time,owner,msg FROM records ORDER BY id LIMIT ? OFFSET ((SELECT count(*) FROM records)-?);");
+        deleteRecords = connection.prepareStatement("DELETE FROM records WHERE id < ?;");
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT count(*) FROM records;");
+        count = rs.getInt(1);
+        statement = connection.createStatement();
+        rs = statement.executeQuery("SELECT min(id) FROM records;");
+        min_id = rs.getInt(1);
+        checkCount();
         started = true;
     }
 
@@ -33,10 +41,26 @@ public class LogSQL implements Logger {
     public void append(String owner, String line) throws Exception {
         if (!started)
             return;
-        newRecord.setString(INDEX_TIME, String.valueOf(System.currentTimeMillis()));
+        newRecord.setLong(INDEX_TIME, System.currentTimeMillis());
         newRecord.setString(INDEX_OWNER, owner);
         newRecord.setString(INDEX_MSG, line);
         newRecord.execute();
+        count++;
+        checkCount();
+    }
+
+    private void checkCount() {
+        if (count <= limit)
+            return;
+        try {
+            int remove = min_id + (count - limit);
+            deleteRecords.setInt(1, remove);
+            deleteRecords.execute();
+            count = limit;
+            min_id = remove;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -63,7 +87,7 @@ public class LogSQL implements Logger {
             record.setOwner(rs.getString(OWNER));
             record.setMsg(rs.getString(MSG));
             records.add(record);
-        } while(rs.next());
+        } while (rs.next());
 
         return records;
     }
