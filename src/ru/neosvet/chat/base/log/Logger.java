@@ -1,6 +1,5 @@
 package ru.neosvet.chat.base.log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public interface Logger {
