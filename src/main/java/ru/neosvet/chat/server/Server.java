@@ -20,13 +20,13 @@ import java.util.*;
 
 public class Server {
     public static final String NICK = "Server";
-    private final String PATH_LOG = "jdbc:sqlite:src/main/resources/server/chat.db";
-    private final int LOG_LIMIT = 100;
+    private final String HYSTORY_PATH = "jdbc:sqlite:src/main/resources/server/chat.db";
+    private final int HYSTORY_LIMIT = 100;
     private ServerSocket serverSocket;
     private AuthSQL authService;
     private int count_users = 0;
     private Map<String, ClientHandler> clients = new HashMap<>();
-    private MyLogger logger;
+    private MyLogger history;
 
     public static void main(String[] args) {
         try {
@@ -105,7 +105,7 @@ public class Server {
     private void stop() throws IOException {
         broadcastRequest(NICK, RequestFactory.createStop());
         try {
-            logger.close();
+            history.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -120,9 +120,9 @@ public class Server {
         authService.start();
         authService.addDefaultUsers();
         System.out.println("Server started");
-        logger = new LogSQL();
+        history = new LogSQL();
         try {
-            logger.start(PATH_LOG, LOG_LIMIT);
+            history.start(HYSTORY_PATH, HYSTORY_LIMIT);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Logger could not start: " + e.getMessage());
@@ -147,7 +147,7 @@ public class Server {
         SimpleDateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss]");
         String curDate = dateFormat.format(Date.from(Instant.now()));
         String newDate;
-        for (Record record : logger.getLastRecords(count)) {
+        for (Record record : history.getLastRecords(count)) {
             newDate = dateFormat.format(record.getDate());
             if (!curDate.equals(newDate)) {
                 curDate = newDate;
@@ -174,7 +174,7 @@ public class Server {
         if (request.getType() == RequestType.MSG_PUBLIC) {
             MessageRequest msg = (MessageRequest) request;
             try {
-                logger.append(msg.getOwner(), msg.getMsg());
+                history.append(msg.getOwner(), msg.getMsg());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -270,6 +270,6 @@ public class Server {
     }
 
     public ArrayList<Record> getChatHistory(int count) throws Exception {
-        return logger.getLastRecords(count);
+        return history.getLastRecords(count);
     }
 }
