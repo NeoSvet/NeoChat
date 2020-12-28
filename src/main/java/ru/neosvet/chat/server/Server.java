@@ -1,5 +1,7 @@
 package ru.neosvet.chat.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import ru.neosvet.chat.base.*;
 import ru.neosvet.chat.base.log.LogSQL;
 import ru.neosvet.chat.base.log.MyLogger;
@@ -27,6 +29,7 @@ public class Server {
     private int count_users = 0;
     private Map<String, ClientHandler> clients = new HashMap<>();
     private MyLogger history;
+    private Logger logger;
 
     public static void main(String[] args) {
         try {
@@ -62,8 +65,7 @@ public class Server {
                         try {
                             showLog(lr.getCount());
                         } catch (Exception e) {
-                            e.printStackTrace();
-                            System.out.println("Error: Failed to get records");
+                            logger.error("Failed to get records: " + e.getMessage());
                         }
                         continue;
                 }
@@ -98,6 +100,7 @@ public class Server {
             }
             return sb.toString();
         } catch (Exception e) {
+            logger.warn("replaceIdToNick: " + e.getMessage());
         }
         return s;
     }
@@ -107,14 +110,17 @@ public class Server {
         try {
             history.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("History could not stop: " + e.getMessage());
         }
         authService.close();
         serverSocket.close();
+        logInfo("Server stopped.");
         System.exit(0);
     }
 
     public void start(int port) throws IOException {
+        logger = (Logger) LogManager.getLogger();
+
         this.serverSocket = new ServerSocket(port);
         this.authService = new AuthSQL();
         authService.start();
@@ -125,7 +131,7 @@ public class Server {
             history.start(HYSTORY_PATH, HYSTORY_LIMIT);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Logger could not start: " + e.getMessage());
+            logger.warn("History could not start: " + e.getMessage());
         }
 
         new Thread(() -> {
@@ -134,11 +140,11 @@ public class Server {
                     waitNewConnection();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("Error Server: " + e.getMessage());
+                logger.error("Error Server: " + e.getMessage());
             }
         }).start();
 
+        logInfo("Server started.");
         chat();
     }
 
@@ -162,8 +168,19 @@ public class Server {
         }
     }
 
+    public void logInfo(String msg) {
+        logger.info(msg);
+    }
+
+    public void logWarn(String msg) {
+        logger.warn(msg);
+    }
+
+    public void logError(String msg) {
+        logger.error(msg);
+    }
+
     private void waitNewConnection() throws IOException {
-        System.out.println("Waiting for connection...");
         Socket clientSocket = serverSocket.accept();
         count_users++;
         ClientHandler clientHandler = new ClientHandler(this, clientSocket, count_users);
@@ -176,8 +193,10 @@ public class Server {
             try {
                 history.append(msg.getOwner(), msg.getMsg());
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.warn("history.append: " + e.getMessage());
             }
+        } else {
+            logger.info(sender + ": " + request.toString());
         }
         System.out.printf("<%s>%s%n", getIdByNick(sender), request.toString());
         if (!sender.equals(NICK) && isNotClientRequest(request.getType())) {
