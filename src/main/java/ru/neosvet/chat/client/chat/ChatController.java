@@ -39,7 +39,7 @@ public class ChatController {
 
     private final int LOG_LIMIT = 100;
     private final String SEND_PUBLIC = "Send public message";
-    private final String PATH_LOG = "/src/ru/neosvet/chat/client";
+    private final String PATH_LOG = "/src/main/resources/client";
     private Client client;
     private String selectedUser = null;
     private MyLogger logger;

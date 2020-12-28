@@ -3,7 +3,7 @@ package ru.neosvet.chat.server.auth;
 import java.sql.*;
 
 public class AuthSQL implements AuthService {
-    private final String DB_PATH = "jdbc:sqlite:users.db";
+    private final String DB_PATH = "jdbc:sqlite:src/main/resources/server/users.db";
     private Connection connection;
     private Statement stmt;
 

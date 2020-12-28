@@ -20,7 +20,7 @@ import java.util.*;
 
 public class Server {
     public static final String NICK = "Server";
-    private final String PATH_LOG = "jdbc:sqlite:src/ru/neosvet/chat/server/chat.db";
+    private final String PATH_LOG = "jdbc:sqlite:src/main/resources/server/chat.db";
     private final int LOG_LIMIT = 100;
     private ServerSocket serverSocket;
     private AuthSQL authService;
