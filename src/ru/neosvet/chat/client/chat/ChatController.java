@@ -13,7 +13,7 @@ import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.base.RequestParser;
 import ru.neosvet.chat.base.RequestType;
 import ru.neosvet.chat.base.log.LogFile;
-import ru.neosvet.chat.base.log.Logger;
+import ru.neosvet.chat.base.log.MyLogger;
 import ru.neosvet.chat.base.log.Record;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.client.Client;
@@ -42,7 +42,7 @@ public class ChatController {
     private final String PATH_LOG = "/src/ru/neosvet/chat/client";
     private Client client;
     private String selectedUser = null;
-    private Logger logger;
+    private MyLogger logger;
 
 
     @FXML

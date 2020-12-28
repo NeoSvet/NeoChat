@@ -2,7 +2,7 @@ package ru.neosvet.chat.server;
 
 import ru.neosvet.chat.base.*;
 import ru.neosvet.chat.base.log.LogSQL;
-import ru.neosvet.chat.base.log.Logger;
+import ru.neosvet.chat.base.log.MyLogger;
 import ru.neosvet.chat.base.log.Record;
 import ru.neosvet.chat.base.requests.LogRequest;
 import ru.neosvet.chat.base.requests.MessageRequest;
@@ -26,7 +26,7 @@ public class Server {
     private AuthSQL authService;
     private int count_users = 0;
     private Map<String, ClientHandler> clients = new HashMap<>();
-    private Logger logger;
+    private MyLogger logger;
 
     public static void main(String[] args) {
         try {

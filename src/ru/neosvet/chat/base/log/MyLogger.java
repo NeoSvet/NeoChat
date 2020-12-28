@@ -2,7 +2,7 @@ package ru.neosvet.chat.base.log;
 
 import java.util.ArrayList;
 
-public interface Logger {
+public interface MyLogger {
 
     void start(String path, int limit) throws Exception;
 

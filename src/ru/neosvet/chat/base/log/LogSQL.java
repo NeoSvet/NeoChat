@@ -3,7 +3,7 @@ package ru.neosvet.chat.base.log;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class LogSQL implements Logger {
+public class LogSQL implements MyLogger {
     private final int INDEX_TIME = 1, INDEX_OWNER = 2, INDEX_MSG = 3;
     private final String TIME = "time", OWNER = "owner", MSG = "msg";
     private Connection connection;
