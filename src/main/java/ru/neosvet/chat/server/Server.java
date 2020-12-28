@@ -63,7 +63,7 @@ public class Server {
                     case LOG:
                         LogRequest lr = (LogRequest) parser.getResult();
                         try {
-                            showLog(lr.getCount());
+                            showHistory(lr.getCount());
                         } catch (Exception e) {
                             logger.error("Failed to get records: " + e.getMessage());
                         }
@@ -148,7 +148,7 @@ public class Server {
         chat();
     }
 
-    private void showLog(int count) throws Exception {
+    private void showHistory(int count) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         SimpleDateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss]");
         String curDate = dateFormat.format(Date.from(Instant.now()));
