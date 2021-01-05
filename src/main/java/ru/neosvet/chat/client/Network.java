@@ -58,22 +58,16 @@ public class Network {
 
                     switch (request.getType()) {
                         case STOP:
-                            connected = false;
-                            socket.close();
+                            reset();
                             client.showMessage("Server stopped");
-                            client.disconnected();
                             return;
                         case BYE:
-                            connected = false;
-                            socket.close();
+                            reset();
                             client.showMessage("You left the chat");
-                            client.disconnected();
                             return;
                         case KICK:
-                            connected = false;
-                            socket.close();
+                            reset();
                             client.showMessage("You was kicked");
-                            client.disconnected();
                             break;
                         case NICK:
                             setNick(getNickFromRequest(request));
@@ -124,6 +118,14 @@ public class Network {
         });
         thread.setDaemon(true);
         thread.start();
+    }
+
+    private void reset() throws IOException {
+        connected = false;
+        socket.close();
+        nick = null;
+        client.showMessage("Server stopped");
+        client.disconnected();
     }
 
     private String getNickFromRequest(Request request) {
