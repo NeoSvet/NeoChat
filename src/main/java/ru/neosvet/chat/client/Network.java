@@ -2,7 +2,6 @@ package ru.neosvet.chat.client;
 
 import ru.neosvet.chat.base.Request;
 import ru.neosvet.chat.base.RequestFactory;
-import ru.neosvet.chat.base.log.Record;
 import ru.neosvet.chat.base.requests.*;
 
 import java.io.IOException;
@@ -22,12 +21,21 @@ public class Network {
         this.client = client;
     }
 
-    public void connect(String host, int port) throws IOException {
-        socket = new Socket(host, port);
-        out = new ObjectOutputStream(socket.getOutputStream());
-        in = new ObjectInputStream(socket.getInputStream());
-        connected = true;
-        waitMessage();
+    public void connect(String host, int port) {
+        Thread thread = new Thread(() -> {
+            try {
+                socket = new Socket(host, port);
+                out = new ObjectOutputStream(socket.getOutputStream());
+                in = new ObjectInputStream(socket.getInputStream());
+                connected = true;
+                client.putResultConnect(null);
+                waitMessage();
+            } catch (IOException e) {
+                e.printStackTrace();
+                client.putResultConnect(e.getMessage());
+            }
+        });
+        thread.start();
     }
 
     public void close() {

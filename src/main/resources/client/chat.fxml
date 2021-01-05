@@ -8,6 +8,17 @@
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
             prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="ru.neosvet.chat.client.chat.ChatController">
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#menuConnect" text="Connect"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
     <center>
         <SplitPane dividerPositions="0.755" prefHeight="40.0" prefWidth="150.0" BorderPane.alignment="CENTER">
             <BorderPane>

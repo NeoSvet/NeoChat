@@ -95,7 +95,7 @@ public class ChatController {
         if (msg.isEmpty())
             return;
         if (msg.equals(Cmd.CONNECT)) {
-            connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
+            client.openConnectWindow();
             tfMessage.clear();
             return;
         }
@@ -141,16 +141,6 @@ public class ChatController {
         lvUsers.refresh();
     }
 
-    public void connect(String localhost, int port) {
-        try {
-            client.connect(localhost, port);
-            showMessage("Connection to server successful");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showMessage("Connection to server failed: " + e.getMessage());
-        }
-    }
-
     private void sendMessage(String msg) throws IOException {
         if (selectedUser != null && !msg.startsWith("/")) {
             msg = Cmd.MSG_PRIVATE + " " + selectedUser + " " + msg;
@@ -173,7 +163,6 @@ public class ChatController {
 
     public void setClient(Client client) {
         this.client = client;
-        connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
     }
 
     public void unSelectUser(ActionEvent actionEvent) {
@@ -206,5 +195,9 @@ public class ChatController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void menuConnect(ActionEvent actionEvent) {
+        client.openConnectWindow();
     }
 }
