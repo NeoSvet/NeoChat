@@ -130,7 +130,6 @@ public class Server {
                 if (i < m.length - 1)
                     sb.append(" ");
             }
-            System.out.println("replaceIdToNick: " + sb.toString());
             return sb.toString();
         } catch (Exception e) {
             logger.warn("replaceIdToNick: " + e.getMessage());
