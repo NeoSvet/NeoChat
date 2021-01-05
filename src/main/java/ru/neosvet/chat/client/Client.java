@@ -164,7 +164,7 @@ public class Client extends Application {
 
     public void disconnected() {
         Platform.runLater(() -> {
-            authStage.close();
+            chatStage.setTitle("Chat");
             chatCtrl.reset();
         });
     }
