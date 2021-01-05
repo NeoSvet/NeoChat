@@ -9,7 +9,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import ru.neosvet.chat.base.Cmd;
-import ru.neosvet.chat.base.Const;
+import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.base.RequestParser;
 import ru.neosvet.chat.base.RequestType;
 import ru.neosvet.chat.base.log.LogFile;
@@ -199,5 +199,13 @@ public class ChatController {
 
     public void menuConnect(ActionEvent actionEvent) {
         client.openConnectWindow();
+    }
+
+    public void menuDisconnect(ActionEvent actionEvent) {
+        try {
+            client.sendRequest(RequestFactory.createExit());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

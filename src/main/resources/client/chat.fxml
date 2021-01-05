@@ -14,6 +14,7 @@
                 <Menu mnemonicParsing="false" text="File">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#menuConnect" text="Connect"/>
+                        <MenuItem mnemonicParsing="false" onAction="#menuDisconnect" text="Disconnect"/>
                     </items>
                 </Menu>
             </menus>
