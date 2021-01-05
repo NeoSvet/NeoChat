@@ -4,10 +4,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.base.RequestParser;
@@ -24,6 +21,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 
 public class ChatController {
     private SimpleDateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss]");
@@ -207,5 +205,23 @@ public class ChatController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void menuChangeNick(ActionEvent actionEvent) {
+        TextInputDialog dialog = new TextInputDialog();
+
+        dialog.setTitle("Change nick");
+        dialog.setHeaderText("");
+        dialog.setContentText("New nick:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(nick -> {
+            try {
+                client.sendRequest(RequestFactory.createNick(nick));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
