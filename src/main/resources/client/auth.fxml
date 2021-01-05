@@ -6,32 +6,55 @@
 <AnchorPane prefHeight="318.0" prefWidth="495.0" xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.neosvet.chat.client.auth.AuthController">
     <children>
-        <TextField fx:id="loginField" layoutX="161.0" layoutY="60.0">
+        <TextField fx:id="tflogin" layoutX="161.0" layoutY="45.0">
             <font>
                 <Font size="24.0"/>
             </font>
         </TextField>
-        <PasswordField fx:id="passwordField" layoutX="161.0" layoutY="159.0" onAction="#signIn">
+        <PasswordField fx:id="passwordField" layoutX="161.0" layoutY="117.0" onAction="#signIn">
             <font>
                 <Font size="24.0"/>
             </font>
         </PasswordField>
-        <Label layoutX="28.0" layoutY="68.0" text="Login">
+        <TextField fx:id="tfNick" layoutX="161.0" layoutY="189.0" visible="false">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </TextField>
+        <Label layoutX="28.0" layoutY="53.0" text="Login">
             <font>
                 <Font size="24.0"/>
             </font>
         </Label>
-        <Label layoutX="28.0" layoutY="167.0" text="Password">
+        <Label layoutX="28.0" layoutY="125.0" text="Password">
             <font>
                 <Font size="24.0"/>
             </font>
         </Label>
-        <Button layoutX="196.0" layoutY="258.0" mnemonicParsing="false" onAction="#signIn" text="Sign in">
+        <Label fx:id="lNick" layoutX="28.0" layoutY="197.0" text="Nick" visible="false">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
+        <Button fx:id="bSwitcher" layoutX="90.0" layoutY="258.0" prefWidth="160"
+                mnemonicParsing="false" onAction="#goSwitch" text="Registration">
             <font>
                 <Font size="24.0"/>
             </font>
         </Button>
-        <Label layoutX="28.0" layoutY="20.0" fx:id="labelError">
+        <Button fx:id="bSignIn" layoutX="265.0" layoutY="258.0" prefWidth="160"
+                mnemonicParsing="false" onAction="#signIn" text="Sign in">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Button>
+        <Button fx:id="bRegister" layoutX="265.0" layoutY="258.0" prefWidth="160"
+                mnemonicParsing="false" onAction="#register" text="Register" visible="false">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Button>
+        <Label fx:id="lError" layoutX="28.0" layoutY="10.0">
             <font>
                 <Font size="16.0"/>
             </font>

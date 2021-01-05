@@ -4,6 +4,7 @@ public enum RequestType {
     EXIT,
     STOP,
     AUTH,
+    REG,
     ERROR,
     JOIN,
     LIST,

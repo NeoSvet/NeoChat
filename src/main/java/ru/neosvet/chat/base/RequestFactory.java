@@ -10,6 +10,10 @@ public class RequestFactory {
         return new AuthRequest(login, password);
     }
 
+    public static Request createReg(String login, String password, String nick) {
+        return new RegRequest(login, password, nick);
+    }
+
     public static Request createExit() {
         return new SampleRequest(RequestType.EXIT);
     }

@@ -1,5 +1,7 @@
 package ru.neosvet.chat.server.auth;
 
+import ru.neosvet.chat.base.Request;
+
 public interface AuthService {
     boolean start();
 
@@ -10,4 +12,6 @@ public interface AuthService {
     User getUser(int id);
 
     boolean changeNick(int id, String new_nick);
+
+    Request regUser(String login, String password, String nick);
 }

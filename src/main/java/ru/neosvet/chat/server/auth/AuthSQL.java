@@ -1,9 +1,16 @@
 package ru.neosvet.chat.server.auth;
 
+import ru.neosvet.chat.base.Request;
+import ru.neosvet.chat.base.RequestFactory;
+import ru.neosvet.chat.base.RequestType;
+import ru.neosvet.chat.base.requests.NumberRequest;
+
 import java.sql.*;
 
 public class AuthSQL implements AuthService {
     private final String DB_PATH = "jdbc:sqlite:src/main/resources/server/users.db";
+    private final int INDEX_LOGIN = 1, INDEX_PASSWORD = 2, INDEX_NICK = 3;
+    private PreparedStatement insertUser;
     private Connection connection;
     private Statement stmt;
 
@@ -20,6 +27,7 @@ public class AuthSQL implements AuthService {
                     + "	nick VARCHAR(32) UNIQUE);";
             stmt.execute(sql);
             System.out.println("AuthService started");
+            insertUser = connection.prepareStatement("INSERT INTO users (login, password, nick) VALUES (?, ?, ?)");
             return true;
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
@@ -82,6 +90,35 @@ public class AuthSQL implements AuthService {
     }
 
     @Override
+    public Request regUser(String login, String password, String nick) {
+        try {
+            ResultSet rs = stmt.executeQuery(String.format("SELECT login FROM users WHERE login = '%s'", login));
+            if (!rs.isClosed()) { //login is busy
+                rs.close();
+                return RequestFactory.createError("Reg", "Login is busy");
+            }
+            rs = stmt.executeQuery(String.format("SELECT login FROM users WHERE nick = '%s'", nick));
+            if (!rs.isClosed()) { //nick is busy
+                rs.close();
+                return RequestFactory.createError("Reg", "Nick is busy");
+            }
+
+            insertUser.setString(INDEX_LOGIN, login);
+            insertUser.setString(INDEX_PASSWORD, password);
+            insertUser.setString(INDEX_NICK, nick);
+            int result = insertUser.executeUpdate();
+            if (result == 1) {
+                rs = stmt.executeQuery(String.format("SELECT id FROM users WHERE login = '%s'", login));
+                return new NumberRequest(RequestType.REG, rs.getInt("id"));
+            }
+            return RequestFactory.createError("Reg", "User was not created");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return RequestFactory.createError("Reg", "Server error: " + e.getMessage());
+        }
+    }
+
+    @Override
     public void close() {
         try {
             stmt.close();
@@ -99,17 +136,15 @@ public class AuthSQL implements AuthService {
                     new User(3, "user3", "3333", "Гендальф_Серый")
             };
 
-            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO users (login, password, nick) VALUES (?, ?, ?)");
-
             for (User user : users) {
-                pstmt.setString(1, user.getLogin());
-                pstmt.setString(2, user.getPassword());
-                pstmt.setString(3, user.getNick());
+                insertUser.setString(INDEX_LOGIN, user.getLogin());
+                insertUser.setString(INDEX_PASSWORD, user.getPassword());
+                insertUser.setString(INDEX_NICK, user.getNick());
 
-                pstmt.addBatch();
+                insertUser.addBatch();
             }
 
-            pstmt.executeBatch();
+            insertUser.executeBatch();
         } catch (SQLException e) {
             //e.printStackTrace();
         }

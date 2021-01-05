@@ -1,5 +1,10 @@
 package ru.neosvet.chat.server.auth;
 
+import ru.neosvet.chat.base.Request;
+import ru.neosvet.chat.base.RequestFactory;
+import ru.neosvet.chat.base.RequestType;
+import ru.neosvet.chat.base.requests.NumberRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +53,19 @@ public class AuthSample implements AuthService {
             return false;
         user.setNick(new_nick);
         return true;
+    }
+
+    @Override
+    public Request regUser(String login, String password, String nick) {
+        for (User client : clients) {
+            if (client.getLogin().equals(login))
+                return RequestFactory.createError("Reg", "Login is busy");
+            if (client.getNick().equals(nick))
+                return RequestFactory.createError("Reg", "Nick is busy");
+        }
+        int id = clients.size() + 1;
+        clients.add(new User(id, login, password, nick));
+        return new NumberRequest(RequestType.REG, id);
     }
 
     @Override

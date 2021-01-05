@@ -5,6 +5,7 @@ public interface Cmd {
     String STOP = "/stop";
     String CONNECT = "/connect";
     String AUTH = "/auth";
+    String REG = "/reg";
     String ERROR = "/error";
     String JOIN = "/join";
     String LIST = "/list";
