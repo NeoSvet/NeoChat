@@ -112,7 +112,11 @@ public class Network {
                     return;
                 e.printStackTrace();
                 client.showErrorMessage("Network", e.getMessage());
-                client.disconnected();
+                try {
+                    reset();
+                } catch (IOException e2) {
+                    e2.printStackTrace();
+                }
             }
 
         });
