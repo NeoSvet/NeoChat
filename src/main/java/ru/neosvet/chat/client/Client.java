@@ -69,7 +69,7 @@ public class Client extends Application {
 
     public void putResultConnect(String error) {
         Platform.runLater(() -> {
-            if(!connectStage.isShowing())
+            if (!connectStage.isShowing())
                 return;
 
             if (error == null) {
@@ -164,6 +164,8 @@ public class Client extends Application {
 
     public void disconnected() {
         Platform.runLater(() -> {
+            if (authStage.isShowing())
+                authStage.close();
             chatStage.setTitle("Chat");
             chatCtrl.reset();
         });
