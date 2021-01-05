@@ -41,6 +41,20 @@ public class Server {
         }
     }
 
+    public Server() {
+        logger = (Logger) LogManager.getLogger();
+        authService = new AuthSQL();
+        authService.start();
+        authService.addDefaultUsers();
+        history = new LogSQL();
+        try {
+            history.start(HYSTORY_PATH, HYSTORY_LIMIT);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("History could not start: " + e.getMessage());
+        }
+    }
+
     private void chat() throws IOException {
         Scanner scan = new Scanner(System.in);
         RequestParser parser = new RequestParser(NICK);
@@ -64,8 +78,7 @@ public class Server {
                         NumberRequest port = (NumberRequest) parser.getResult();
                         broadcastRequest(NICK, RequestFactory.createStop());
                         serverSocket.close();
-                        serverSocket = new ServerSocket(port.getNumber());
-                        System.out.println("Server started on " + port.getNumber());
+                        start(port.getNumber());
                         continue;
                     case LOG:
                         NumberRequest log = (NumberRequest) parser.getResult();
@@ -126,21 +139,8 @@ public class Server {
     }
 
     public void start(int port) throws IOException {
-        logger = (Logger) LogManager.getLogger();
-
         serverSocket = new ServerSocket(port);
-        authService = new AuthSQL();
-        authService.start();
-        authService.addDefaultUsers();
         System.out.println("Server started on " + port);
-        history = new LogSQL();
-        try {
-            history.start(HYSTORY_PATH, HYSTORY_LIMIT);
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.warn("History could not start: " + e.getMessage());
-        }
-
         new Thread(() -> {
             try {
                 while (true) {
