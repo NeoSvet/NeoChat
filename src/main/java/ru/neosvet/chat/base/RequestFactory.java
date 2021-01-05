@@ -74,4 +74,7 @@ public class RequestFactory {
         return new RecordsRequest(records);
     }
 
+    public static Request createDelUser(int id) {
+        return new NumberRequest(RequestType.DELUSER, id);
+    }
 }

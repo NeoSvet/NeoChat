@@ -69,6 +69,17 @@ public class AuthSample implements AuthService {
     }
 
     @Override
+    public boolean delUser(int id) {
+        for (int i = 0; i < clients.size(); i++) {
+            if (clients.get(i).getId() == id) {
+                clients.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void close() {
         System.out.println("AuthService stopped");
     }

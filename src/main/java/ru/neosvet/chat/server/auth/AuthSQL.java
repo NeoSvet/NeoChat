@@ -119,6 +119,17 @@ public class AuthSQL implements AuthService {
     }
 
     @Override
+    public boolean delUser(int id) {
+        try {
+            int result = stmt.executeUpdate(String.format("DELETE FROM users WHERE id = %d", id));
+            return result == 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public void close() {
         try {
             stmt.close();

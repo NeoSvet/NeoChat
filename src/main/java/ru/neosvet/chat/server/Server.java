@@ -80,6 +80,18 @@ public class Server {
                         serverSocket.close();
                         start(port.getNumber());
                         continue;
+                    case DELUSER:
+                        NumberRequest user = (NumberRequest) parser.getResult();
+                        parser.parse(replaceIdToNick(Cmd.KICK + " " + Cmd.ID + user.getNumber()));
+                        if (clients.containsKey(parser.getRecipient())) {
+                            clients.get(parser.getRecipient()).sendRequest(parser.getResult());
+                        }
+                        if (authService.delUser(user.getNumber())) {
+                            System.out.println("Deleted user with id " + user.getNumber());
+                        } else {
+                            System.out.println("User with id " + user.getNumber() + " has not been deleted");
+                        }
+                        continue;
                     case LOG:
                         NumberRequest log = (NumberRequest) parser.getResult();
                         try {
@@ -118,6 +130,7 @@ public class Server {
                 if (i < m.length - 1)
                     sb.append(" ");
             }
+            System.out.println("replaceIdToNick: " + sb.toString());
             return sb.toString();
         } catch (Exception e) {
             logger.warn("replaceIdToNick: " + e.getMessage());

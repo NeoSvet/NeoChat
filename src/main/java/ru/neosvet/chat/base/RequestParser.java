@@ -53,12 +53,19 @@ public class RequestParser {
                     result = RequestFactory.createLog(Integer.parseInt(m[1]));
                     break;
                 case Cmd.PORT:
+                    if (!IsServer())
+                        return false;
                     result = RequestFactory.createPort(Integer.parseInt(m[1]));
                     break;
                 case Cmd.STOP:
                     if (!IsServer())
                         return false;
                     result = RequestFactory.createStop();
+                    break;
+                case Cmd.DELUSER:
+                    if (!IsServer())
+                        return false;
+                    result = RequestFactory.createDelUser(Integer.parseInt(m[1]));
                     break;
                 case Cmd.KICK:
                     if (!IsServer())
