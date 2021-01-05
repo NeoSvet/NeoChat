@@ -124,7 +124,6 @@ public class Network {
         connected = false;
         socket.close();
         nick = null;
-        client.showMessage("Server stopped");
         client.disconnected();
     }
 
