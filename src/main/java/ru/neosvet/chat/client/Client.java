@@ -203,4 +203,8 @@ public class Client extends Application {
             e.printStackTrace();
         }
     }
+
+    public boolean isConnect() {
+        return network.isConnect();
+    }
 }

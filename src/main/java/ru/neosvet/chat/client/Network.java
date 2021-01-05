@@ -158,5 +158,9 @@ public class Network {
     public String getNick() {
         return nick;
     }
+
+    public boolean isConnect() {
+        return connected;
+    }
 }
 

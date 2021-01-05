@@ -3,6 +3,7 @@ package ru.neosvet.chat.client.chat;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import ru.neosvet.chat.base.Cmd;
@@ -34,6 +35,8 @@ public class ChatController {
     private Label lPrivate;
     @FXML
     private ListView<String> lvUsers;
+    @FXML
+    private MenuItem mConnect, mDisconnect, mChangeNick;
 
     private final int LOG_LIMIT = 100;
     private final String SEND_PUBLIC = "Send public message";
@@ -223,5 +226,17 @@ public class ChatController {
                 e.printStackTrace();
             }
         });
+    }
+
+    public void prepareMenu(Event event) {
+        if (client.isConnect()) {
+            mConnect.setVisible(false);
+            mDisconnect.setVisible(true);
+            mChangeNick.setVisible(true);
+        } else {
+            mConnect.setVisible(true);
+            mDisconnect.setVisible(false);
+            mChangeNick.setVisible(false);
+        }
     }
 }

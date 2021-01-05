@@ -11,11 +11,14 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
-                <Menu mnemonicParsing="false" text="File">
+                <Menu mnemonicParsing="false" text="File" onShown="#prepareMenu">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menuConnect" text="Connect"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menuDisconnect" text="Disconnect"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menuChangeNick" text="Change nick"/>
+                        <MenuItem fx:id="mConnect" mnemonicParsing="false"
+                                  onAction="#menuConnect" text="Connect"/>
+                        <MenuItem fx:id="mDisconnect" mnemonicParsing="false"
+                                  onAction="#menuDisconnect" text="Disconnect"/>
+                        <MenuItem fx:id="mChangeNick" mnemonicParsing="false"
+                                  onAction="#menuChangeNick" text="Change nick"/>
                     </items>
                 </Menu>
             </menus>
