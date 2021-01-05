@@ -6,8 +6,8 @@ import ru.neosvet.chat.base.*;
 import ru.neosvet.chat.base.log.LogSQL;
 import ru.neosvet.chat.base.log.MyLogger;
 import ru.neosvet.chat.base.log.Record;
-import ru.neosvet.chat.base.requests.LogRequest;
 import ru.neosvet.chat.base.requests.MessageRequest;
+import ru.neosvet.chat.base.requests.NumberRequest;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.server.auth.AuthSQL;
 import ru.neosvet.chat.server.auth.AuthService;
@@ -60,10 +60,17 @@ public class Server {
                     case MSG_PRIVATE:
                         sendPrivateMessage(NICK, (PrivateMessageRequest) parser.getResult());
                         continue;
+                    case PORT:
+                        NumberRequest port = (NumberRequest) parser.getResult();
+                        broadcastRequest(NICK, RequestFactory.createStop());
+                        serverSocket.close();
+                        serverSocket = new ServerSocket(port.getNumber());
+                        System.out.println("Server started on " + port.getNumber());
+                        continue;
                     case LOG:
-                        LogRequest lr = (LogRequest) parser.getResult();
+                        NumberRequest log = (NumberRequest) parser.getResult();
                         try {
-                            showHistory(lr.getCount());
+                            showHistory(log.getNumber());
                         } catch (Exception e) {
                             logger.error("Failed to get records: " + e.getMessage());
                         }
@@ -121,11 +128,11 @@ public class Server {
     public void start(int port) throws IOException {
         logger = (Logger) LogManager.getLogger();
 
-        this.serverSocket = new ServerSocket(port);
-        this.authService = new AuthSQL();
+        serverSocket = new ServerSocket(port);
+        authService = new AuthSQL();
         authService.start();
         authService.addDefaultUsers();
-        System.out.println("Server started");
+        System.out.println("Server started on " + port);
         history = new LogSQL();
         try {
             history.start(HYSTORY_PATH, HYSTORY_LIMIT);

@@ -59,7 +59,11 @@ public class RequestFactory {
     }
 
     public static Request createLog(int count) {
-        return new LogRequest(count);
+        return new NumberRequest(RequestType.LOG, count);
+    }
+
+    public static Request createPort(int port) {
+        return new NumberRequest(RequestType.PORT, port);
     }
 
     public static Request createRecords(ArrayList<Record> records) {

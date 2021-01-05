@@ -13,6 +13,7 @@ public enum RequestType {
     NICK,
     RENAME,
     LOG,
+    PORT,
     RECORDS,
     MSG_PRIVATE,
     MSG_PUBLIC

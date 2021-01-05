@@ -52,6 +52,9 @@ public class RequestParser {
                 case Cmd.LOG:
                     result = RequestFactory.createLog(Integer.parseInt(m[1]));
                     break;
+                case Cmd.PORT:
+                    result = RequestFactory.createPort(Integer.parseInt(m[1]));
+                    break;
                 case Cmd.STOP:
                     if (!IsServer())
                         return false;
