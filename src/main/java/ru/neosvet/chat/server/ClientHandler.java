@@ -96,12 +96,9 @@ public class ClientHandler {
                 case REG:
                     RegRequest reg = (RegRequest) request;
                     Request result = authService.regUser(reg.getLogin(), reg.getPassword(), reg.getNick());
-                    if (result.getType() == RequestType.ERROR) {
-                        sendRequest(result);
-                    } else {
+                    sendRequest(result);
+                    if (result.getType() == RequestType.REG) {
                         System.out.printf("Created new user (login/password/nick): %s/%s/%s%n", reg.getLogin(), reg.getPassword(), reg.getNick());
-                        authOk(((NumberRequest) result).getNumber(), reg.getNick());
-                        return;
                     }
                     break;
                 default:

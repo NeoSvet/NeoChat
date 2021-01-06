@@ -54,7 +54,7 @@
                 <Font size="24.0"/>
             </font>
         </Button>
-        <Label fx:id="lError" layoutX="28.0" layoutY="10.0">
+        <Label fx:id="lStatus" layoutX="28.0" layoutY="10.0">
             <font>
                 <Font size="16.0"/>
             </font>

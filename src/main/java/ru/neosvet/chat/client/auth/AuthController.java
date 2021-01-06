@@ -16,7 +16,7 @@ public class AuthController {
     @FXML
     public PasswordField passwordField;
     @FXML
-    public Label lError, lNick;
+    public Label lStatus, lNick;
     @FXML
     public Button bSwitcher, bSignIn, bRegister;
 
@@ -43,7 +43,7 @@ public class AuthController {
     }
 
     public void showError(String msg) {
-        lError.setText(msg);
+        lStatus.setText(msg);
     }
 
     public void setClient(Client client) {
@@ -85,6 +85,15 @@ public class AuthController {
         } catch (IOException e) {
             e.printStackTrace();
             showError(e.getMessage());
+        }
+    }
+
+    public void authOk() {
+        if (bSignIn.isVisible()) {
+            client.goChat();
+        } else {
+            lStatus.setText("User " + tflogin.getText() + " was created.");
+            goSwitch();
         }
     }
 }

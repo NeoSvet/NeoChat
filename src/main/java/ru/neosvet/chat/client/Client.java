@@ -109,17 +109,15 @@ public class Client extends Application {
         }
     }
 
-    public void resultAuth(String err_msg) {
-        if (err_msg != null) {
+    public void resultAuth(String error) {
+        if (error != null) {
             Platform.runLater(() -> {
-                authCtrl.showError(err_msg);
+                authCtrl.showError(error);
             });
             return;
         }
         Platform.runLater(() -> {
-            authStage.close();
-            chatStage.setTitle("Chat: " + network.getNick());
-            chatCtrl.setFocus();
+            authCtrl.authOk();
         });
         showMessage("You connected as " + network.getNick());
     }
@@ -208,5 +206,17 @@ public class Client extends Application {
 
     public boolean isConnect() {
         return network.isConnect();
+    }
+
+    public void goChat() {
+        authStage.close();
+        chatStage.setTitle("Chat: " + network.getNick());
+        chatCtrl.setFocus();
+    }
+
+    public void regOk() {
+        Platform.runLater(() -> {
+            authCtrl.authOk();
+        });
     }
 }

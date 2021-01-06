@@ -88,6 +88,9 @@ public class Network {
                         case LEFT:
                             client.leftUser(getNickFromRequest(request));
                             break;
+                        case REG:
+                            client.regOk();
+                            break;
                         case RENAME:
                             client.renameUser((MessageRequest) request);
                             break;
