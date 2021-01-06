@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.Blend?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
+            prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.neosvet.chat.client.chat.ChatController">
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <menus>
+                <Menu mnemonicParsing="false" text="File" onShown="#prepareMenu">
+                    <items>
+                        <MenuItem fx:id="mConnect" mnemonicParsing="false"
+                                  onAction="#menuConnect" text="Connect"/>
+                        <MenuItem fx:id="mDisconnect" mnemonicParsing="false"
+                                  onAction="#menuDisconnect" text="Disconnect"/>
+                        <MenuItem fx:id="mChangeNick" mnemonicParsing="false"
+                                  onAction="#menuChangeNick" text="Change nick"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <center>
+        <SplitPane dividerPositions="0.755" prefHeight="40.0" prefWidth="150.0" BorderPane.alignment="CENTER">
+            <BorderPane>
+                <center>
+                    <TextArea fx:id="taChat" editable="false" prefHeight="360.0" prefWidth="450.0"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                              AnchorPane.topAnchor="0.0">
+                        <font>
+                            <Font size="20.0"/>
+                        </font>
+                    </TextArea>
+                </center>
+                <bottom>
+                    <Label fx:id="lPrivate" layoutX="10.0" layoutY="0.0">
+                        <font>
+                            <Font size="18.0"/>
+                        </font>
+                        <padding>
+                            <Insets left="5.0"/>
+                        </padding>
+                    </Label>
+                </bottom>
+            </BorderPane>
+            <BorderPane>
+                <center>
+                    <ListView fx:id="lvUsers" editable="true" prefHeight="360.0" prefWidth="150.0"
+                              BorderPane.alignment="CENTER">
+                        <effect>
+                            <Blend/>
+                        </effect>
+                    </ListView>
+                </center>
+                <bottom>
+                    <Button mnemonicParsing="false" onAction="#unSelectUser" prefHeight="38.0" prefWidth="150.0"
+                            text="Unselect"/>
+                </bottom>
+            </BorderPane>
+        </SplitPane>
+    </center>
+    <bottom>
+        <BorderPane>
+            <center>
+                <TextField fx:id="tfMessage" onAction="#sendMessage" prefHeight="38.0" prefWidth="450.0"
+                           promptText="Type a message">
+                    <font>
+                        <Font size="18.0"/>
+                    </font>
+                </TextField>
+            </center>
+            <right>
+                <Button mnemonicParsing="false" onAction="#sendMessage" prefHeight="38.0" prefWidth="150.0"
+                        text="Send"/>
+            </right>
+        </BorderPane>
+    </bottom>
+</BorderPane>

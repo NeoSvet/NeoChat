@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+<AnchorPane prefHeight="318.0" prefWidth="495.0" xmlns="http://javafx.com/javafx/11.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.neosvet.chat.client.auth.AuthController">
+    <children>
+        <TextField fx:id="tflogin" layoutX="161.0" layoutY="45.0">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </TextField>
+        <PasswordField fx:id="passwordField" layoutX="161.0" layoutY="117.0" onAction="#signIn">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </PasswordField>
+        <TextField fx:id="tfNick" layoutX="161.0" layoutY="189.0" visible="false">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </TextField>
+        <Label layoutX="28.0" layoutY="53.0" text="Login">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
+        <Label layoutX="28.0" layoutY="125.0" text="Password">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
+        <Label fx:id="lNick" layoutX="28.0" layoutY="197.0" text="Nick" visible="false">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
+        <CheckBox fx:id="saveLogin" layoutX="90.0" layoutY="197.0" mnemonicParsing="false" text="save login">
+            <font>
+                <Font size="18.0"/>
+            </font>
+        </CheckBox>
+        <CheckBox fx:id="savePassword" layoutX="210.0" layoutY="197.0" mnemonicParsing="false"
+                  text="save password (unsafe)">
+            <font>
+                <Font size="18.0"/>
+            </font>
+        </CheckBox>
+        <Button fx:id="bSwitcher" layoutX="90.0" layoutY="258.0" mnemonicParsing="false" onAction="#goSwitch"
+                prefWidth="160" text="Registration">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Button>
+        <Button fx:id="bSignIn" layoutX="265.0" layoutY="258.0" mnemonicParsing="false" onAction="#signIn"
+                prefWidth="160" text="Sign in">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Button>
+        <Button fx:id="bRegister" layoutX="265.0" layoutY="258.0" mnemonicParsing="false" onAction="#register"
+                prefWidth="160" text="Register" visible="false">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Button>
+        <Label fx:id="lStatus" layoutX="28.0" layoutY="10.0">
+            <font>
+                <Font size="16.0"/>
+            </font>
+        </Label>
+    </children>
+</AnchorPane>
