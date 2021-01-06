@@ -36,20 +36,31 @@
                 <Font size="24.0"/>
             </font>
         </Label>
-        <Button fx:id="bSwitcher" layoutX="90.0" layoutY="258.0" prefWidth="160"
-                mnemonicParsing="false" onAction="#goSwitch" text="Registration">
+        <CheckBox fx:id="saveLogin" layoutX="90.0" layoutY="197.0" mnemonicParsing="false" text="save login">
+            <font>
+                <Font size="18.0"/>
+            </font>
+        </CheckBox>
+        <CheckBox fx:id="savePassword" layoutX="210.0" layoutY="197.0" mnemonicParsing="false"
+                  text="save password (unsafe)">
+            <font>
+                <Font size="18.0"/>
+            </font>
+        </CheckBox>
+        <Button fx:id="bSwitcher" layoutX="90.0" layoutY="258.0" mnemonicParsing="false" onAction="#goSwitch"
+                prefWidth="160" text="Registration">
             <font>
                 <Font size="24.0"/>
             </font>
         </Button>
-        <Button fx:id="bSignIn" layoutX="265.0" layoutY="258.0" prefWidth="160"
-                mnemonicParsing="false" onAction="#signIn" text="Sign in">
+        <Button fx:id="bSignIn" layoutX="265.0" layoutY="258.0" mnemonicParsing="false" onAction="#signIn"
+                prefWidth="160" text="Sign in">
             <font>
                 <Font size="24.0"/>
             </font>
         </Button>
-        <Button fx:id="bRegister" layoutX="265.0" layoutY="258.0" prefWidth="160"
-                mnemonicParsing="false" onAction="#register" text="Register" visible="false">
+        <Button fx:id="bRegister" layoutX="265.0" layoutY="258.0" mnemonicParsing="false" onAction="#register"
+                prefWidth="160" text="Register" visible="false">
             <font>
                 <Font size="24.0"/>
             </font>

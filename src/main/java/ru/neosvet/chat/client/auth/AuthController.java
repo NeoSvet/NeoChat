@@ -1,10 +1,7 @@
 package ru.neosvet.chat.client.auth;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.client.Client;
 
@@ -19,6 +16,8 @@ public class AuthController {
     public Label lStatus, lNick;
     @FXML
     public Button bSwitcher, bSignIn, bRegister;
+    @FXML
+    public CheckBox saveLogin, savePassword;
 
     private Client client;
 
@@ -34,6 +33,16 @@ public class AuthController {
             return;
         }
 
+        if (saveLogin.isSelected())
+            client.getSettings().setLogin(login);
+        else
+            client.getSettings().setLogin(null);
+
+        if (savePassword.isSelected())
+            client.getSettings().setPassword(password);
+        else
+            client.getSettings().setPassword(null);
+
         try {
             client.sendRequest(RequestFactory.createAuth(login, password));
         } catch (IOException e) {
@@ -48,6 +57,12 @@ public class AuthController {
 
     public void setClient(Client client) {
         this.client = client;
+        tflogin.setText(client.getSettings().getLogin());
+        if (tflogin.getText().length() > 0)
+            saveLogin.setSelected(true);
+        passwordField.setText(client.getSettings().getPassword());
+        if (passwordField.getText().length() > 0)
+            savePassword.setSelected(true);
     }
 
     @FXML
@@ -58,12 +73,16 @@ public class AuthController {
             bRegister.setVisible(true);
             lNick.setVisible(true);
             tfNick.setVisible(true);
+            saveLogin.setVisible(false);
+            savePassword.setVisible(false);
         } else {
             bSwitcher.setText("Registration");
             bSignIn.setVisible(true);
             bRegister.setVisible(false);
             lNick.setVisible(false);
             tfNick.setVisible(false);
+            saveLogin.setVisible(true);
+            savePassword.setVisible(true);
         }
     }
 

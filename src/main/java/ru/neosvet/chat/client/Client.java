@@ -29,9 +29,14 @@ public class Client extends Application {
     private Stage authStage;
     private Stage chatStage;
     private Stage connectStage;
+    private Settings settings;
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public Settings getSettings() {
+        return settings;
     }
 
     @Override
@@ -39,6 +44,8 @@ public class Client extends Application {
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource(UI_CHAT));
         Parent root = loader.load();
+
+        settings = new Settings();
 
         chatStage = primaryStage;
         chatStage.setTitle("Chat");
@@ -50,6 +57,7 @@ public class Client extends Application {
         chatCtrl.setClient(this);
 
         primaryStage.setOnCloseRequest(windowEvent -> {
+            settings.save();
             network.close();
             chatCtrl.close();
         });

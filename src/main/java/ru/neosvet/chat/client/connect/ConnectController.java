@@ -4,7 +4,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.client.Client;
 
 public class ConnectController {
@@ -17,15 +16,10 @@ public class ConnectController {
 
     private Client client;
 
-
-    @FXML
-    public void initialize() {
-        hostField.setText(Const.DEFAULT_HOST);
-        portField.setText(String.valueOf(Const.DEFAULT_PORT));
-    }
-
     public void setClient(Client client) {
         this.client = client;
+        hostField.setText(client.getSettings().getHost());
+        portField.setText(client.getSettings().getPort());
     }
 
     public void setError(String msg) {
@@ -34,6 +28,8 @@ public class ConnectController {
 
     public void connect(ActionEvent actionEvent) {
         statusLabel.setText("Connection...");
+        client.getSettings().setHost(hostField.getText());
+        client.getSettings().setPort(portField.getText());
         client.connect(hostField.getText(), Integer.parseInt(portField.getText()));
     }
 }
