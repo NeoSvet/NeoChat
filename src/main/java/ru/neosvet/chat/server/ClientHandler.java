@@ -31,7 +31,7 @@ public class ClientHandler {
         this.srv = srv;
         this.clientSocket = clientSocket;
         this.id = id;
-        System.out.printf("User #%d connected!%n", id);
+        srv.logInfo("User #" + id + " connected!");
     }
 
     public void handle() throws IOException {
@@ -45,8 +45,7 @@ public class ClientHandler {
             } catch (IOException e) {
                 if (!connected)
                     return;
-                e.printStackTrace();
-                System.out.println("Error ClientHandler: " + e.getMessage());
+                srv.logError("Error ClientHandler: " + e.getMessage());
                 srv.unSubscribe(this);
             }
         }).start();
@@ -60,7 +59,7 @@ public class ClientHandler {
                 sendRequest(RequestFactory.createKick());
                 clientSocket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                srv.logWarn("ClientHandler.TimeTask: " + e.getMessage());
             }
         }
     };
@@ -89,7 +88,7 @@ public class ClientHandler {
                         if (srv.isNickBusy(nick)) {
                             sendRequest(RequestFactory.createError("Auth", "User is busy"));
                         } else {
-                            System.out.printf("User #%d auth as %s (id %d)%n", id, nick, user.getId());
+                            srv.logInfo(String.format("User #%d auth as %s (id %d)", id, nick, user.getId()));
                             id = user.getId();
                             timer.cancel();
                             sendRequest(RequestFactory.createNick(nick));
@@ -130,7 +129,8 @@ public class ClientHandler {
                     UserRequest user = (UserRequest) request;
                     if (srv.getAuthService().changeNick(id, user.getNick())) {
                         srv.changeNick(nick, user.getNick());
-                        nick = user.getNick();;
+                        nick = user.getNick();
+                        ;
                         sendRequest(user);
                     } else {
                         sendRequest(RequestFactory.createError("Error", "Nick is busy"));
@@ -141,11 +141,11 @@ public class ClientHandler {
                             Server.NICK, srv.getUsersListToString()));
                     break;
                 case LOG:
-                    LogRequest lr = (LogRequest)request;
+                    LogRequest lr = (LogRequest) request;
                     try {
                         sendRequest(RequestFactory.createRecords(srv.getChatHistory(lr.getCount())));
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        srv.logError("ClientHandler.LogRequest: " + e.getMessage());
                         sendRequest(RequestFactory.createError("Error", "Failed to get records"));
                     }
                     break;
@@ -157,8 +157,7 @@ public class ClientHandler {
         try {
             return (Request) in.readObject();
         } catch (ClassNotFoundException e) {
-            System.err.println("[ERROR]Unknown request");
-            e.printStackTrace();
+            srv.logWarn("ClientHandler.readRequest: Unknown request. " + e.getMessage());
             return null;
         }
     }

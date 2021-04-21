@@ -17,8 +17,8 @@ import ru.neosvet.chat.client.chat.ChatController;
 import java.io.IOException;
 
 public class Client extends Application {
-    private final String UI_CHAT = "chat/chat.fxml";
-    private final String UI_AUTH = "auth/auth.fxml";
+    private final String UI_CHAT = "/client/chat.fxml";
+    private final String UI_AUTH = "/client/auth.fxml";
 
     private ChatController chat;
     private AuthController auth;

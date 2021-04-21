@@ -3,7 +3,7 @@ package ru.neosvet.chat.base.log;
 import java.io.*;
 import java.util.ArrayList;
 
-public class LogFile implements Logger {
+public class LogFile implements MyLogger {
     private String path;
     private int limit;
     private int count = 0;
