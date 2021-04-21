@@ -3,6 +3,7 @@ package ru.neosvet.chat.server;
 import ru.neosvet.chat.base.Request;
 import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.base.requests.AuthRequest;
+import ru.neosvet.chat.base.requests.LogRequest;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.base.requests.UserRequest;
 import ru.neosvet.chat.server.auth.AuthService;
@@ -138,6 +139,15 @@ public class ClientHandler {
                 case LIST:
                     sendRequest(RequestFactory.createPublicMsg(
                             Server.NICK, srv.getUsersListToString()));
+                    break;
+                case LOG:
+                    LogRequest lr = (LogRequest)request;
+                    try {
+                        sendRequest(RequestFactory.createRecords(srv.getChatHistory(lr.getCount())));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        sendRequest(RequestFactory.createError("Error", "Failed to get records"));
+                    }
                     break;
             }
         }

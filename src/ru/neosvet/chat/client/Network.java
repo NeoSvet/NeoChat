@@ -2,10 +2,8 @@ package ru.neosvet.chat.client;
 
 import ru.neosvet.chat.base.Request;
 import ru.neosvet.chat.base.RequestFactory;
-import ru.neosvet.chat.base.requests.ListRequest;
-import ru.neosvet.chat.base.requests.MessageRequest;
-import ru.neosvet.chat.base.requests.PrivateMessageRequest;
-import ru.neosvet.chat.base.requests.UserRequest;
+import ru.neosvet.chat.base.log.Record;
+import ru.neosvet.chat.base.requests.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -93,11 +91,14 @@ public class Network {
                             break;
                         case MSG_PUBLIC:
                             MessageRequest mr = (MessageRequest) request;
-                            client.showMessage(String.format("<%s>%s", mr.getOwner(), mr.getMsg()));
+                            client.showMessage(mr.getOwner(), mr.getMsg());
                             break;
                         case MSG_PRIVATE:
                             PrivateMessageRequest pmr = (PrivateMessageRequest) request;
-                            client.showMessage(String.format("[PRIVATE FROM]<%s>%s", pmr.getSender(), pmr.getMsg()));
+                            client.showMessage(pmr.getSender(), "[PRIVATE]" + pmr.getMsg());
+                            break;
+                        case RECORDS:
+                            client.showRecords((RecordsRequest) request);
                             break;
                         default:
                             client.showMessage("[ERROR]Unknown request: " + request.getType());

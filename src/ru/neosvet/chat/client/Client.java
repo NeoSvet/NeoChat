@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import ru.neosvet.chat.base.Request;
 import ru.neosvet.chat.base.RequestFactory;
 import ru.neosvet.chat.base.requests.MessageRequest;
+import ru.neosvet.chat.base.requests.RecordsRequest;
 import ru.neosvet.chat.client.auth.AuthController;
 import ru.neosvet.chat.client.chat.ChatController;
 
@@ -44,7 +45,10 @@ public class Client extends Application {
         chat = loader.getController();
         chat.setClient(this);
 
-        primaryStage.setOnCloseRequest(windowEvent -> network.close());
+        primaryStage.setOnCloseRequest(windowEvent -> {
+            network.close();
+            chat.close();
+        });
     }
 
     public void showErrorMessage(String title, String msg) {
@@ -109,6 +113,12 @@ public class Client extends Application {
         });
     }
 
+    public void showMessage(String owner, String msg) {
+        Platform.runLater(() -> {
+            chat.showMessage(owner, msg);
+        });
+    }
+
     public String getMyNick() {
         return network.getNick();
     }
@@ -145,6 +155,12 @@ public class Client extends Application {
     public void renameUser(MessageRequest request) {
         Platform.runLater(() -> {
             chat.renameUser(request.getOwner(), request.getMsg());
+        });
+    }
+
+    public void showRecords(RecordsRequest request) {
+        Platform.runLater(() -> {
+            chat.showRecords(request.getRecords(), "HISTORY FROM SERVER");
         });
     }
 }

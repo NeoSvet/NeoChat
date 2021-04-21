@@ -12,6 +12,8 @@ public enum RequestType {
     KICK,
     NICK,
     RENAME,
+    LOG,
+    RECORDS,
     MSG_PRIVATE,
     MSG_PUBLIC
 }

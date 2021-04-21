@@ -12,15 +12,22 @@ import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.base.Const;
 import ru.neosvet.chat.base.RequestParser;
 import ru.neosvet.chat.base.RequestType;
+import ru.neosvet.chat.base.log.LogFile;
+import ru.neosvet.chat.base.log.Logger;
+import ru.neosvet.chat.base.log.Record;
 import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.client.Client;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 public class ChatController {
     private SimpleDateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss]");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     @FXML
     private TextField tfMessage;
     @FXML
@@ -30,15 +37,46 @@ public class ChatController {
     @FXML
     private ListView<String> lvUsers;
 
+    private final int LOG_LIMIT = 100;
     private final String SEND_PUBLIC = "Send public message";
+    private final String PATH_LOG = "/src/ru/neosvet/chat/client";
     private Client client;
     private String selectedUser = null;
+    private Logger logger;
 
 
     @FXML
     public void initialize() {
         initEventSelectUser();
         lPrivate.setText(SEND_PUBLIC);
+        logger = new LogFile();
+        try {
+            logger.start(System.getProperty("user.dir") + PATH_LOG, LOG_LIMIT);
+            showRecords(logger.getLastRecords(LOG_LIMIT), "LOCAL HISTORY");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showMessage("Logger could not start: " + e.getMessage());
+        }
+    }
+
+    public void showRecords(ArrayList<Record> records, String title) {
+        taChat.appendText("______ START " + title + "______\n");
+        String curDate = dateFormat.format(Date.from(Instant.now()));
+        String newDate;
+        for (Record record : records) {
+            newDate = dateFormat.format(record.getDate());
+            if (!curDate.equals(newDate)) {
+                curDate = newDate;
+                taChat.appendText("______" + newDate + "______\n");
+            }
+            taChat.appendText(timeFormat.format(record.getDate()));
+            if (record.hasOwner()) {
+                taChat.appendText(String.format("<%s>%s%n", record.getOwner(), record.getMsg()));
+            } else {
+                taChat.appendText(String.format("%s%n", record.getMsg()));
+            }
+        }
+        taChat.appendText("______ END " + title + "______\n");
     }
 
     private void initEventSelectUser() {
@@ -71,7 +109,23 @@ public class ChatController {
     }
 
     public void showMessage(String msg) {
+        try {
+            logger.append("", msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error by logger.append");
+        }
         taChat.appendText(getTime() + msg + "\n");
+    }
+
+    public void showMessage(String owner, String msg) {
+        try {
+            logger.append(owner, msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error by logger.append");
+        }
+        taChat.appendText(getTime() + String.format("<%s>%s%n", owner, msg));
     }
 
     private String getTime() {
@@ -106,7 +160,7 @@ public class ChatController {
             client.sendRequest(parser.getResult());
             if (parser.getResult().getType() == RequestType.MSG_PRIVATE) {
                 PrivateMessageRequest pmr = (PrivateMessageRequest) parser.getResult();
-                showMessage(String.format("[PRIVATE TO]<%s>%s", pmr.getRecipient(), pmr.getMsg()));
+                showMessage(client.getMyNick(), String.format("[PRIVATE TO %s]%s", pmr.getRecipient(), pmr.getMsg()));
                 return;
             } else if (parser.getResult().getType() == RequestType.EXIT) {
                 return;
@@ -114,7 +168,7 @@ public class ChatController {
         } else {
             client.sendMessage(msg);
         }
-        showMessage(String.format("<%s>%s", client.getMyNick(), msg));
+        showMessage(client.getMyNick(), msg);
     }
 
     public void setClient(Client client) {
@@ -144,5 +198,13 @@ public class ChatController {
 
     public void setFocus() {
         tfMessage.requestFocus();
+    }
+
+    public void close() {
+        try {
+            logger.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
