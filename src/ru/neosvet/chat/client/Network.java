@@ -1,21 +1,24 @@
 package ru.neosvet.chat.client;
 
-import ru.neosvet.chat.base.Chat;
-import ru.neosvet.chat.base.Cmd;
+import ru.neosvet.chat.base.Request;
+import ru.neosvet.chat.base.RequestFactory;
+import ru.neosvet.chat.base.requests.ListRequest;
+import ru.neosvet.chat.base.requests.MessageRequest;
+import ru.neosvet.chat.base.requests.PrivateMessageRequest;
+import ru.neosvet.chat.base.requests.UserRequest;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Arrays;
 
 public class Network {
-    private DataInputStream in;
-    private DataOutputStream out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private Socket socket;
     private boolean connected = false;
     private Client client;
-    private String nick = "noname";
+    private String nick = null;
 
     public Network(Client client) {
         this.client = client;
@@ -23,17 +26,17 @@ public class Network {
 
     public void connect(String host, int port) throws IOException {
         socket = new Socket(host, port);
-        in = new DataInputStream(socket.getInputStream());
-        out = new DataOutputStream(socket.getOutputStream());
+        out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
         connected = true;
+        waitMessage();
     }
 
     public void close() {
         if (!connected)
             return;
         try {
-            sendCommand(Cmd.EXIT);
-            socket.close();
+            sendRequest(RequestFactory.createExit());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -43,47 +46,67 @@ public class Network {
         Thread thread = new Thread(() -> {
             try {
                 while (true) {
-                    String[] m = Chat.parseMessage(in.readUTF());
-                    switch (m[0]) {
-                        case Cmd.STOP:
+                    Request request = readRequest();
+                    if (request == null)
+                        continue;
+
+                    switch (request.getType()) {
+                        case STOP:
                             connected = false;
                             socket.close();
                             client.showMessage("Server stopped");
                             client.disconnected();
                             return;
-                        case Cmd.BYE:
+                        case BYE:
                             connected = false;
                             socket.close();
                             client.showMessage("You left the chat");
                             client.disconnected();
                             return;
-                        case Cmd.AUTH:
-                            authentication(m);
+                        case KICK:
+                            connected = false;
+                            socket.close();
+                            client.showMessage("You was kicked");
+                            client.disconnected();
                             break;
-                        case Cmd.ERROR:
-                            client.showErrorMessage(m[1], m[2]);
+                        case NICK:
+                            setNick(getNickFromRequest(request));
                             break;
-                        case Cmd.JOIN:
-                            client.joinUser(m[1]);
+                        case ERROR:
+                            MessageRequest mrErr = (MessageRequest) request;
+                            if (nick == null) //if user is not auth
+                                client.resultAuth(mrErr.getMsg());
+                            else
+                                client.showErrorMessage(mrErr.getOwner(), mrErr.getMsg());
                             break;
-                        case Cmd.LIST:
-                            client.loadUserList(m);
+                        case JOIN:
+                            client.joinUser(getNickFromRequest(request));
                             break;
-                        case Cmd.LEFT:
-                            client.leftUser(m[1]);
+                        case LIST:
+                            client.loadUserList(((ListRequest) request).getUsers());
                             break;
-                        case Cmd.MSG_CLIENT:
-                            client.showMessage(String.format("<%s>%s", m[1], m[2]));
+                        case LEFT:
+                            client.leftUser(getNickFromRequest(request));
                             break;
-                        case Cmd.MSG_PRIVATE:
-                            client.showMessage(String.format("[PRIVATE FROM]<%s>%s", m[1], m[2]));
+                        case RENAME:
+                            client.renameUser((MessageRequest) request);
+                            break;
+                        case MSG_PUBLIC:
+                            MessageRequest mr = (MessageRequest) request;
+                            client.showMessage(String.format("<%s>%s", mr.getOwner(), mr.getMsg()));
+                            break;
+                        case MSG_PRIVATE:
+                            PrivateMessageRequest pmr = (PrivateMessageRequest) request;
+                            client.showMessage(String.format("[PRIVATE FROM]<%s>%s", pmr.getSender(), pmr.getMsg()));
                             break;
                         default:
-                            client.showMessage(Arrays.toString(m));
+                            client.showMessage("[ERROR]Unknown request: " + request.getType());
                             break;
                     }
                 }
             } catch (IOException e) {
+                if (!connected)
+                    return;
                 e.printStackTrace();
                 client.showErrorMessage("Network", e.getMessage());
                 client.disconnected();
@@ -94,24 +117,33 @@ public class Network {
         thread.start();
     }
 
-    private void authentication(String[] m) {
-        if (m[1].equals(Cmd.ERROR)) {
-            client.resultAuth(m[2]);
-            return;
+    private String getNickFromRequest(Request request) {
+        return ((UserRequest) request).getNick();
+    }
+
+    private Request readRequest() throws IOException {
+        try {
+            return (Request) in.readObject();
+        } catch (ClassNotFoundException e) {
+            System.err.println("[ERROR]Unknown request");
+            e.printStackTrace();
+            return null;
         }
-        nick = m[1];
+    }
+
+    private void setNick(String nick) {
+        this.nick = nick;
         client.resultAuth(null);
     }
 
-    public void sendCommand(String cmd, String... args) throws IOException {
+    public void sendRequest(Request request) throws IOException {
         if (!connected) {
             client.showMessage("No connection");
             return;
         }
-        if (cmd.equals(Cmd.AUTH))
-            waitMessage();
 
-        Chat.sendCommand(out, cmd, args);
+        out.writeObject(request);
+        out.flush();
     }
 
     public String getNick() {

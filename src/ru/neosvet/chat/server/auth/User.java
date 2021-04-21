@@ -4,14 +4,20 @@ import java.util.Objects;
 
 public class User {
 
-    private final String login;
-    private final String password;
-    private final String nick;
+    private String login;
+    private String password;
+    private String nick;
+    private int id;
 
-    public User(String login, String password, String nick) {
+    public User(int id, String login, String password, String nick) {
+        this.id = id;
         this.login = login;
         this.password = password;
         this.nick = nick;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getLogin() {
@@ -24,6 +30,18 @@ public class User {
 
     public String getNick() {
         return nick;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
     }
 
     @Override

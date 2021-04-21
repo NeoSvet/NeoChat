@@ -10,6 +10,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import ru.neosvet.chat.base.Cmd;
 import ru.neosvet.chat.base.Const;
+import ru.neosvet.chat.base.RequestParser;
+import ru.neosvet.chat.base.RequestType;
+import ru.neosvet.chat.base.requests.PrivateMessageRequest;
 import ru.neosvet.chat.client.Client;
 
 import java.io.IOException;
@@ -27,7 +30,7 @@ public class ChatController {
     @FXML
     private ListView<String> lvUsers;
 
-    private final String SEND_GLOBAL = "Send global message";
+    private final String SEND_PUBLIC = "Send public message";
     private Client client;
     private String selectedUser = null;
 
@@ -35,7 +38,7 @@ public class ChatController {
     @FXML
     public void initialize() {
         initEventSelectUser();
-        lPrivate.setText(SEND_GLOBAL);
+        lPrivate.setText(SEND_PUBLIC);
     }
 
     private void initEventSelectUser() {
@@ -53,27 +56,12 @@ public class ChatController {
         String msg = tfMessage.getText().trim();
         if (msg.isEmpty())
             return;
-        /*if (msg.startsWith(Const.NICK)) {
-            nick = msg.substring(msg.indexOf(" ") + 1);
-            showMessage("Changed nick to " + nick);
-            tfMessage.clear();
-            return;
-        }*/
         if (msg.equals(Cmd.CONNECT)) {
             connect(Const.DEFAULT_HOST, Const.DEFAULT_PORT);
             tfMessage.clear();
             return;
         }
         try {
-            if (selectedUser != null) {
-                showMessage(String.format("[PRIVATE TO]<%s>%s", selectedUser, msg));
-                client.sendPrivateMessage(selectedUser, msg);
-                tfMessage.clear();
-                return;
-            }
-            if (!msg.equals(Cmd.EXIT)) {
-                showMessage(String.format("<%s>%s", client.getMyNick(), msg));
-            }
             sendMessage(msg);
             tfMessage.clear();
         } catch (IOException e) {
@@ -110,7 +98,23 @@ public class ChatController {
     }
 
     private void sendMessage(String msg) throws IOException {
-        client.sendMessage(msg);
+        if (selectedUser != null && !msg.startsWith("/")) {
+            msg = Cmd.MSG_PRIVATE + " " + selectedUser + " " + msg;
+        }
+        RequestParser parser = new RequestParser(client.getMyNick());
+        if (parser.parse(msg)) {
+            client.sendRequest(parser.getResult());
+            if (parser.getResult().getType() == RequestType.MSG_PRIVATE) {
+                PrivateMessageRequest pmr = (PrivateMessageRequest) parser.getResult();
+                showMessage(String.format("[PRIVATE TO]<%s>%s", pmr.getRecipient(), pmr.getMsg()));
+                return;
+            } else if (parser.getResult().getType() == RequestType.EXIT) {
+                return;
+            }
+        } else {
+            client.sendMessage(msg);
+        }
+        showMessage(String.format("<%s>%s", client.getMyNick(), msg));
     }
 
     public void setClient(Client client) {
@@ -121,10 +125,24 @@ public class ChatController {
     public void unSelectUser(ActionEvent actionEvent) {
         selectedUser = null;
         lvUsers.getSelectionModel().clearSelection();
-        lPrivate.setText(SEND_GLOBAL);
+        lPrivate.setText(SEND_PUBLIC);
     }
 
     public void reset() {
         lvUsers.getItems().clear();
+    }
+
+    public void renameUser(String old_nick, String new_nick) {
+        for (int i = 0; i < lvUsers.getItems().size(); i++) {
+            if (lvUsers.getItems().get(i).equals(old_nick)) {
+                lvUsers.getItems().set(i, new_nick);
+                break;
+            }
+        }
+        showMessage(String.format("User %s renamed to %s", old_nick, new_nick));
+    }
+
+    public void setFocus() {
+        tfMessage.requestFocus();
     }
 }

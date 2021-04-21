@@ -1,36 +1,49 @@
 package ru.neosvet.chat.server;
 
-import ru.neosvet.chat.base.Chat;
-import ru.neosvet.chat.base.Cmd;
-import ru.neosvet.chat.base.Const;
+import ru.neosvet.chat.base.Request;
+import ru.neosvet.chat.base.RequestFactory;
+import ru.neosvet.chat.base.requests.AuthRequest;
+import ru.neosvet.chat.base.requests.PrivateMessageRequest;
+import ru.neosvet.chat.base.requests.UserRequest;
 import ru.neosvet.chat.server.auth.AuthService;
+import ru.neosvet.chat.server.auth.User;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ClientHandler {
+    private final int AUTH_TIMEOUT = 120000;
     private Server srv;
     private Socket clientSocket;
-    private DataInputStream in;
-    private DataOutputStream out;
-    private String nick;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+    private String nick = null;
+    private int id;
+    private boolean connected = false;
+    private Timer timer;
 
-    public ClientHandler(Server srv, Socket clientSocket) {
+    public ClientHandler(Server srv, Socket clientSocket, int id) {
         this.srv = srv;
         this.clientSocket = clientSocket;
+        this.id = id;
+        System.out.printf("User #%d connected!%n", id);
     }
 
-    public void handle() {
+    public void handle() throws IOException {
+        in = new ObjectInputStream(clientSocket.getInputStream());
+        out = new ObjectOutputStream(clientSocket.getOutputStream());
+        connected = true;
         new Thread(() -> {
             try {
-                in = new DataInputStream(clientSocket.getInputStream());
-                out = new DataOutputStream(clientSocket.getOutputStream());
-
                 authentication();
                 readMessage();
             } catch (IOException e) {
+                if (!connected)
+                    return;
                 e.printStackTrace();
                 System.out.println("Error ClientHandler: " + e.getMessage());
                 srv.unSubscribe(this);
@@ -38,56 +51,112 @@ public class ClientHandler {
         }).start();
     }
 
+    private TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            try {
+                connected = false;
+                sendRequest(RequestFactory.createKick());
+                clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     private void authentication() throws IOException {
+        timer = new Timer();
+        timer.schedule(task, AUTH_TIMEOUT);
         while (true) {
-            String msg = in.readUTF();
-            if (msg.startsWith(Cmd.AUTH)) {
-                String[] m = Chat.parseMessage(msg);
-                String login = m[1];
-                String password = m[2];
+            Request request = readRequest();
+            if (request == null)
+                continue;
 
-                AuthService authService = srv.getAuthService();
-                nick = authService.getNickByLoginAndPassword(login, password);
-                if (nick != null) {
-                    if (srv.isNickBusy(nick)) {
-                        sendCommand(Cmd.AUTH, Cmd.ERROR, "Nick is busy");
+            //System.out.printf("Message from user #%d: %s%n", id, msg);
+            switch (request.getType()) {
+                case EXIT:
+                    connected = false;
+                    sendRequest(RequestFactory.createBye());
+                    clientSocket.close();
+                    return;
+                case AUTH:
+                    AuthRequest auth = (AuthRequest) request;
+                    AuthService authService = srv.getAuthService();
+                    User user = authService.getUser(auth.getLogin(), auth.getPassword());
+                    if (user != null) {
+                        nick = user.getNick();
+                        if (srv.isNickBusy(nick)) {
+                            sendRequest(RequestFactory.createError("Auth", "User is busy"));
+                        } else {
+                            System.out.printf("User #%d auth as %s (id %d)%n", id, nick, user.getId());
+                            id = user.getId();
+                            timer.cancel();
+                            sendRequest(RequestFactory.createNick(nick));
+                            sendRequest(RequestFactory.createList(srv.getUsersList()));
+                            srv.broadcastRequest(nick, RequestFactory.createJoin(nick));
+                            srv.subscribe(this);
+                            return;
+                        }
                     } else {
-                        sendCommand(Cmd.AUTH, nick);
-                        sendCommand(Cmd.LIST, srv.getUsersList());
-                        srv.broadcastCommand(nick, Cmd.JOIN, nick);
-                        srv.subscribe(this);
-                        return;
+                        sendRequest(RequestFactory.createError("Auth", "Login or password is incorrect"));
                     }
-                } else {
-                    sendCommand(Cmd.AUTH, Cmd.ERROR, "Login or password is incorrect");
-                }
-
-            } else {
-                sendCommand(Cmd.ERROR, "Authentication", "You are not authorized");
+                    break;
+                default:
+                    sendRequest(RequestFactory.createError("Auth", "You are not authorized"));
+                    break;
             }
         }
     }
 
     private void readMessage() throws IOException {
         while (true) {
-            String[] m = Chat.parseMessage(in.readUTF());
-            switch (m[0]) {
-                case Cmd.EXIT:
+            Request request = readRequest();
+            if (request == null)
+                continue;
+
+            switch (request.getType()) {
+                case EXIT:
                     leaveChat();
                     return;
-                case Cmd.MSG_PRIVATE:
-                    srv.sendPrivateMessage(nick, m[1], m[2]);
+                case MSG_PRIVATE:
+                    srv.sendPrivateMessage(nick,
+                            (PrivateMessageRequest) request);
                     break;
-                case Cmd.MSG_CLIENT:
-                    srv.broadcastMessage(nick, m[1]);
+                case MSG_PUBLIC:
+                    srv.broadcastRequest(nick, request);
+                    break;
+                case NICK:
+                    UserRequest user = (UserRequest) request;
+                    if (srv.getAuthService().changeNick(id, user.getNick())) {
+                        srv.changeNick(nick, user.getNick());
+                        nick = user.getNick();;
+                        sendRequest(user);
+                    } else {
+                        sendRequest(RequestFactory.createError("Error", "Nick is busy"));
+                    }
+                    break;
+                case LIST:
+                    sendRequest(RequestFactory.createPublicMsg(
+                            Server.NICK, srv.getUsersListToString()));
                     break;
             }
         }
     }
 
+    private Request readRequest() throws IOException {
+        try {
+            return (Request) in.readObject();
+        } catch (ClassNotFoundException e) {
+            System.err.println("[ERROR]Unknown request");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private void leaveChat() throws IOException {
-        sendCommand(Cmd.BYE, "");
-        srv.broadcastCommand(nick, Cmd.LEFT, nick);
+        connected = false;
+        sendRequest(RequestFactory.createBye());
+        srv.broadcastRequest(nick, RequestFactory.createLeft(nick));
         srv.unSubscribe(this);
         clientSocket.close();
     }
@@ -96,7 +165,13 @@ public class ClientHandler {
         return nick;
     }
 
-    public void sendCommand(String cmd, String... args) throws IOException {
-        Chat.sendCommand(out, cmd, args);
+    public void sendRequest(Request request) throws IOException {
+        //System.out.println("send to " + nick + ": " + request.toString());
+        out.writeObject(request);
+        out.flush();
+    }
+
+    public int getId() {
+        return id;
     }
 }

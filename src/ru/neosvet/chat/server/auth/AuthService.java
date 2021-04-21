@@ -1,9 +1,13 @@
 package ru.neosvet.chat.server.auth;
 
 public interface AuthService {
-    void start();
-
-    String getNickByLoginAndPassword(String login, String password);
+    boolean start();
 
     void close();
+
+    User getUser(String login, String password);
+
+    User getUser(int id);
+
+    boolean changeNick(int id, String new_nick);
 }

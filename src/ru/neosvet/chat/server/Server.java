@@ -1,22 +1,23 @@
 package ru.neosvet.chat.server;
 
-import ru.neosvet.chat.base.Cmd;
-import ru.neosvet.chat.base.Const;
-import ru.neosvet.chat.server.auth.AuthSample;
+import ru.neosvet.chat.base.*;
+import ru.neosvet.chat.base.requests.PrivateMessageRequest;
+import ru.neosvet.chat.server.auth.AuthSQL;
 import ru.neosvet.chat.server.auth.AuthService;
+import ru.neosvet.chat.server.auth.User;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Server {
-    private final String nick = "Server";
+    public static final String NICK = "Server";
     private ServerSocket serverSocket;
-    private AuthService authService;
+    private AuthSQL authService;
+    private int count_users = 0;
     private Map<String, ClientHandler> clients = new HashMap<>();
 
     public static void main(String[] args) {
@@ -31,22 +32,61 @@ public class Server {
 
     private void chat() throws IOException {
         Scanner scan = new Scanner(System.in);
+        RequestParser parser = new RequestParser(NICK);
         while (true) {
             String s = scan.nextLine();
-            if (s.equals(Cmd.STOP)) {
-                stop();
-                return;
-            } else if(s.startsWith(Cmd.MSG_PRIVATE)) {
-                String[] m = s.split(" ", 3);
-                sendPrivateMessage(nick, m[1], m[2]);
+            if (s.contains(Cmd.ID)) {
+                s = replaceIdToNick(s);
+            }
+            if (parser.parse(s)) {
+                switch (parser.getResult().getType()) {
+                    case STOP:
+                        stop();
+                        return;
+                    case LIST:
+                        System.out.println(getUsersListToString());
+                        continue;
+                    case MSG_PRIVATE:
+                        sendPrivateMessage(NICK, (PrivateMessageRequest) parser.getResult());
+                        continue;
+                }
+                if (parser.HasRecipient()) {
+                    if (clients.containsKey(parser.getRecipient())) {
+                        clients.get(parser.getRecipient()).sendRequest(parser.getResult());
+                    } else {
+                        System.out.println("Command no sent: no recipient");
+                    }
+                    continue;
+                }
+                broadcastRequest(NICK, parser.getResult());
                 continue;
             }
-            broadcastMessage(nick, s);
+            broadcastRequest(NICK, RequestFactory.createPublicMsg(NICK, s));
         }
     }
 
+    private String replaceIdToNick(String s) {
+        String[] m = s.split(" ");
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < m.length; i++) {
+                if (m[i].startsWith(Cmd.ID)) {
+                    int id = Integer.parseInt(m[i].substring(Cmd.ID.length()));
+                    User user = authService.getUser(id);
+                    sb.append(user.getNick());
+                } else
+                    sb.append(m[i]);
+                if (i < m.length - 1)
+                    sb.append(" ");
+            }
+            return sb.toString();
+        } catch (Exception e) {
+        }
+        return s;
+    }
+
     private void stop() throws IOException {
-        broadcastCommand(nick, Cmd.STOP);
+        broadcastRequest(NICK, RequestFactory.createStop());
         authService.close();
         serverSocket.close();
         System.exit(0);
@@ -54,8 +94,9 @@ public class Server {
 
     public void start(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
-        this.authService = new AuthSample();
+        this.authService = new AuthSQL();
         authService.start();
+        authService.addDefaultUsers();
         System.out.println("Server started");
 
         new Thread(() -> {
@@ -75,31 +116,32 @@ public class Server {
     private void waitNewConnection() throws IOException {
         System.out.println("Waiting for connection...");
         Socket clientSocket = serverSocket.accept();
-        System.out.println("User connected!");
-        ClientHandler clientHandler = new ClientHandler(this, clientSocket);
+        count_users++;
+        ClientHandler clientHandler = new ClientHandler(this, clientSocket, count_users);
         clientHandler.handle();
     }
 
-    public void broadcastMessage(String sender, String msg) throws IOException {
-        broadcastCommand(sender, Cmd.MSG_CLIENT, sender, msg);
-    }
-
-    public void broadcastCommand(String sender, String cmd, String... args) throws IOException {
-        if (!sender.equals(nick)) {
-            System.out.printf("Message from %s: %s%n", sender, Arrays.toString(args));
-            if (isNotClientCmd(cmd))
-                return;
+    public void broadcastRequest(String sender, Request request) throws IOException {
+        System.out.printf("<%s>%s%n", getIdByNick(sender), request.toString());
+        if (!sender.equals(NICK) && isNotClientRequest(request.getType())) {
+            return;
         }
         for (ClientHandler client : clients.values()) {
             if (client.getNick().equals(sender)) {
                 continue;
             }
-            client.sendCommand(cmd, args);
+            client.sendRequest(request);
         }
     }
 
-    private boolean isNotClientCmd(String cmd) {
-        return cmd.equals(Cmd.STOP) || cmd.equals(Cmd.BYE);
+    private String getIdByNick(String nick) {
+        if (!clients.containsKey(nick))
+            return nick;
+        return "id:" + clients.get(nick).getId();
+    }
+
+    private boolean isNotClientRequest(RequestType type) {
+        return type == RequestType.STOP || type == RequestType.BYE || type == RequestType.KICK;
     }
 
     public AuthService getAuthService() {
@@ -107,7 +149,7 @@ public class Server {
     }
 
     public boolean isNickBusy(String nick) {
-        if (nick.equals(this.nick))
+        if (nick.equals(this.NICK))
             return true;
         if (clients.containsKey(nick))
             return true;
@@ -122,32 +164,51 @@ public class Server {
         clients.remove(clientHandler.getNick());
     }
 
-    public String[] getUsersList() {
-        String[] m = new String[clients.size() + 1];
-        m[0] = nick;
-        int i = 1;
+    public String getUsersListToString() {
+        StringBuilder sb = new StringBuilder("User list:\n");
         for (String nick : clients.keySet()) {
-            m[i++] = nick;
+            sb.append("id:");
+            sb.append(clients.get(nick).getId());
+            sb.append(" nick:");
+            sb.append(nick);
+            sb.append("\n");
         }
-        return m;
+        return sb.toString();
     }
 
-    public void sendPrivateMessage(String sender, String recipient, String msg) throws IOException {
-        if(nick.equals(recipient)) {
-            System.out.printf("Private message from %s: %s%n", sender, msg);
+    public String[] getUsersList() {
+        String[] users = new String[clients.size() + 1];
+        users[0] = NICK;
+        int i = 1;
+        for (String nick : clients.keySet()) {
+            users[i++] = nick;
+        }
+        return users;
+    }
+
+    public void sendPrivateMessage(String sender, PrivateMessageRequest request) throws IOException {
+        if (NICK.equals(request.getRecipient())) {
+            System.out.printf("Private message from %s: %s%n", sender, request.getMsg());
             return;
         }
-        if (clients.containsKey(recipient)) {
-            clients.get(recipient).sendCommand(Cmd.MSG_PRIVATE, sender, msg);
+        if (clients.containsKey(request.getRecipient())) {
+            clients.get(request.getRecipient()).sendRequest(request);
             return;
         }
-        if(nick.equals(sender)) {
-            System.out.printf("User with nick '%s' is missing%n", recipient);
+        if (NICK.equals(sender)) {
+            System.out.printf("User with nick '%s' is missing%n", request.getRecipient());
             return;
         }
         if (clients.containsKey(sender)) {
-            clients.get(sender).sendCommand(Cmd.ERROR, "Message not sent",
-                    String.format("User with nick '%s' is missing", recipient));
+            clients.get(sender).sendRequest(RequestFactory.createError("Message not sent",
+                    String.format("User with nick '%s' is missing", request.getRecipient())));
         }
+    }
+
+    public void changeNick(String old_nick, String new_nick) throws IOException {
+        ClientHandler client = clients.get(old_nick);
+        broadcastRequest(old_nick, RequestFactory.createRename(old_nick, new_nick));
+        clients.remove(old_nick);
+        clients.put(new_nick, client);
     }
 }
